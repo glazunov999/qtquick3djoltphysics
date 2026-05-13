@@ -25,12 +25,7 @@ Window {
         objectLayerPairFilter: ExampleObjectLayerPairFilter {}
         broadPhaseLayer: ExampleBroadPhaseLayer {}
         objectVsBroadPhaseLayerFilter: ExampleObjectVsBroadPhaseLayerFilter {}
-        collisionSteps: 24
-        settings: PhysicsSettings {
-            numPositionSteps: 20
-            numVelocitySteps: 100
-            baumgarte: 1
-        }
+        collisionSteps: 4
     }
 
     View3D {
@@ -170,7 +165,7 @@ Window {
 
         Connections {
             target: physicsSystem
-            property real totalAnimationTime: 12000
+            property real totalAnimationTime: 24000
             function onFrameDone(timeStep) {
                 let progressStep = timeStep * 1000 / totalAnimationTime
                 animationController.progress += progressStep

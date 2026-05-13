@@ -727,8 +727,18 @@ void Body::updateJoltObject()
     m_bodySettings.mMassPropertiesOverride.mMass = m_mass;
     m_bodySettings.mMassPropertiesOverride.mInertia = PhysicsUtils::toJoltType(m_inertia);
 
-    m_bodySettings.mPosition = PhysicsUtils::toJoltType(scenePosition());
-    m_bodySettings.mRotation = PhysicsUtils::toJoltType(sceneRotation());
+    if (m_motionType == MotionType::Kinematic) {
+        QHash<QQuick3DNode *, QMatrix4x4> transformCache;
+        const QMatrix4x4 transform = calculateKinematicNodeTransform(this, transformCache);
+        JPH::Vec3 position;
+        JPH::Quat rotation;
+        getJoltPositionAndRotation(transform, position, rotation);
+        m_bodySettings.mPosition = position;
+        m_bodySettings.mRotation = rotation;
+    } else {
+        m_bodySettings.mPosition = PhysicsUtils::toJoltType(scenePosition());
+        m_bodySettings.mRotation = PhysicsUtils::toJoltType(sceneRotation());
+    }
 
     m_body = m_bodyInterface->CreateBody(m_bodySettings);
     m_body->SetUserData(reinterpret_cast<JPH::uint64>(this));
