@@ -17,19 +17,20 @@ void CollisionGroup::setGroupFilterTable(GroupFilterTable *groupFilterTable)
         return;
 
     if (m_groupFilterTable)
-        m_groupFilterTable->disconnect(m_groupFilterTableSignalConnection);
+        m_groupFilterTable->disconnect(this);
 
     m_groupFilterTable = groupFilterTable;
-    m_groupFilterTableSignalConnection = QObject::connect(m_groupFilterTable, &GroupFilterTable::changed, this,
-                    [this] { handleGroupFilterTableChange(); });
-    QObject::connect(m_groupFilterTable, &QObject::destroyed, this,
-                     [this](QObject *obj)
-    {
-        if (m_groupFilterTable == obj) {
-            m_groupFilterTable = nullptr;
-            handleGroupFilterTableChange();
-        }
-    });
+
+    if (m_groupFilterTable) {
+        QObject::connect(m_groupFilterTable, &GroupFilterTable::changed, this,
+                         [this] { handleGroupFilterTableChange(); });
+        QObject::connect(m_groupFilterTable, &QObject::destroyed, this,
+                         [this](QObject *obj)
+                         {
+                             if (m_groupFilterTable == obj)
+                                 setGroupFilterTable(nullptr);
+                         });
+    }
 
     emit groupFilterTableChanged(m_groupFilterTable);
     handleGroupFilterTableChange();

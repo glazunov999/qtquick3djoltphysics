@@ -105,6 +105,8 @@ protected:
 private:
     Body *m_body1 = nullptr;
     Body *m_body2 = nullptr;
+    QMetaObject::Connection m_body1SignalConnection;
+    QMetaObject::Connection m_body2SignalConnection;
     QVector3D m_position1;
     QVector3D m_position2;
     QVector3D m_twistAxis1 = QVector3D(1, 0, 0);

@@ -1,6 +1,8 @@
 #include "distanceconstraint_p.h"
 #include "physicsutils_p.h"
 
+#include <QtQuick3D/private/qquick3dobject_p.h>
+
 #include <Jolt/Physics/PhysicsSystem.h>
 
 DistanceConstraint::DistanceConstraint(QQuick3DNode *parent) : AbstractPhysicsConstraint(parent)
@@ -59,13 +61,16 @@ void DistanceConstraint::setBody1(Body *body)
     if (m_body1 == body)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'body1' after constraint is initialized will have "
-                      "no effect";
-        return;
+    QQuick3DObjectPrivate::attachWatcher(this, &DistanceConstraint::setBody1, body, m_body1);
+    if (m_body1 != nullptr)
+        m_body1->disconnect(m_body1SignalConnection);
+    m_body1 = body;
+    if (m_body1) {
+        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
+                                                   [this] { updateJoltObject(); });
     }
 
-    m_body1 = body;
+    updateJoltObject();
     emit body1Changed(m_body1);
 }
 
@@ -79,13 +84,16 @@ void DistanceConstraint::setBody2(Body *body)
     if (m_body2 == body)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'body2' after constraint is initialized will have "
-                      "no effect";
-        return;
+    QQuick3DObjectPrivate::attachWatcher(this, &DistanceConstraint::setBody2, body, m_body2);
+    if (m_body2 != nullptr)
+        m_body2->disconnect(m_body2SignalConnection);
+    m_body2 = body;
+    if (m_body2) {
+        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
+                                                   [this] { updateJoltObject(); });
     }
 
-    m_body2 = body;
+    updateJoltObject();
     emit body2Changed(m_body2);
 }
 
@@ -134,36 +142,47 @@ void DistanceConstraint::setLimitsSpringSettings(SpringSettings *limitsSpringSet
         return;
 
     if (m_limitsSpringSettings)
-        m_limitsSpringSettings->disconnect(m_limitsSpringSettingsConnection);
+        m_limitsSpringSettings->disconnect(this);
 
     m_limitsSpringSettings = limitsSpringSettings;
 
-    m_limitsSpringSettingsConnection = QObject::connect(m_limitsSpringSettings, &SpringSettings::changed, this,
-                        [this]
-    {
-        if (m_constraint != nullptr)
-            static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(m_limitsSpringSettings->getJoltSpringSettings());
-    });
-    QObject::connect(m_limitsSpringSettings, &QObject::destroyed, this,
-                        [this](QObject *obj)
-    {
-        if (m_limitsSpringSettings == obj) {
-            m_limitsSpringSettings = nullptr;
-            if (m_constraint != nullptr)
-                static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(JPH::SpringSettings());
-        }
-    });
+    if (m_limitsSpringSettings) {
+        QObject::connect(m_limitsSpringSettings, &SpringSettings::changed, this,
+                         [this]
+                         {
+                             if (m_constraint != nullptr)
+                                 static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(m_limitsSpringSettings->getJoltSpringSettings());
+                         });
+        QObject::connect(m_limitsSpringSettings, &QObject::destroyed, this,
+                         [this](QObject *obj)
+                         {
+                             if (m_limitsSpringSettings == obj)
+                                 setLimitsSpringSettings(nullptr);
+                         });
+    }
 
-    if (m_constraint != nullptr)
-        static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(m_limitsSpringSettings->getJoltSpringSettings());
+    if (m_constraint != nullptr) {
+        if (m_limitsSpringSettings)
+            static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(m_limitsSpringSettings->getJoltSpringSettings());
+        else
+            static_cast<JPH::DistanceConstraint *>(m_constraint)->SetLimitsSpringSettings(JPH::SpringSettings());
+    }
 
     emit limitsSpringSettingsChanged(m_limitsSpringSettings);
 }
 
 void DistanceConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || m_body1 == nullptr || m_body2 == nullptr || m_constraint)
+    if (m_jolt == nullptr
+            || m_body1 == nullptr
+            || m_body2 == nullptr
+            || m_body1->m_body == nullptr
+            || m_body2->m_body == nullptr) {
         return;
+    }
+
+    if (m_constraint)
+        m_jolt->RemoveConstraint(m_constraint);
 
     m_constraintSettings.mPoint1 = PhysicsUtils::toJoltType(m_point1);
     m_constraintSettings.mPoint2 = PhysicsUtils::toJoltType(m_point2);

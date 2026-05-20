@@ -51,6 +51,8 @@ private:
     QVector3D m_point2;
     Body *m_body1 = nullptr;
     Body *m_body2 = nullptr;
+    QMetaObject::Connection m_body1SignalConnection;
+    QMetaObject::Connection m_body2SignalConnection;
     JPH::PointConstraintSettings m_constraintSettings;
 };
 

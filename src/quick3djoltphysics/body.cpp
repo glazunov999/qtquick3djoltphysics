@@ -46,19 +46,20 @@ void Body::setCollisionGroup(CollisionGroup *collisionGroup)
         return;
 
     if (m_collisionGroup != nullptr)
-        m_collisionGroup->disconnect(m_collisionGroupSignalConnection);
+        m_collisionGroup->disconnect(this);
 
     m_collisionGroup = collisionGroup;
-    m_collisionGroupSignalConnection = QObject::connect(m_collisionGroup, &CollisionGroup::changed, this,
-                    [this] { m_collisionGroupDirty = true; });
-    QObject::connect(m_collisionGroup, &QObject::destroyed, this,
-                    [this](QObject *obj)
-    {
-        if (m_collisionGroup == obj) {
-            m_collisionGroup = nullptr;
-            m_collisionGroupDirty = true;
-        }
-    });
+
+    if (m_collisionGroup) {
+        connect(m_collisionGroup, &CollisionGroup::changed, this,
+                        [this] { m_collisionGroupDirty = true; });
+        connect(m_collisionGroup, &QObject::destroyed, this,
+                        [this](QObject *obj)
+        {
+            if (m_collisionGroup == obj)
+                setCollisionGroup(nullptr);
+        });
+    }
 
     m_collisionGroupDirty = true;
     emit collisionGroupChanged(collisionGroup);

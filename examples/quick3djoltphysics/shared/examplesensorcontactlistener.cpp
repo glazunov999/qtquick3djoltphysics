@@ -1,5 +1,7 @@
 #include "examplesensorcontactlistener.h"
 
+#include <utility>
+
 ExampleSensorContactListener::ExampleSensorContactListener(QObject *parent) : AbstractContactListener(parent) {}
 
 ExampleSensorContactListener::ValidateResult ExampleSensorContactListener::contactValidate(const BodyContact &bodyContact, const QVector3D &baseOffset, const CollideShapeResult &collisionResult)
@@ -83,7 +85,7 @@ QList<int> ExampleSensorContactListener::getBodiesInSensor(int sensor) const
         return outBodiesInSensor;
 
     auto &bodiesInSensor = m_bodiesInSensor[sensor];
-    for (const auto &b : bodiesInSensor)
+    for (const auto &b : std::as_const(bodiesInSensor))
        outBodiesInSensor.push_back(b.bodyID);
 
     return outBodiesInSensor;

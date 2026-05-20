@@ -71,6 +71,8 @@ private:
     QVector3D m_point2;
     Body *m_body1 = nullptr;
     Body *m_body2 = nullptr;
+    QMetaObject::Connection m_body1SignalConnection;
+    QMetaObject::Connection m_body2SignalConnection;
     QVector3D m_axisX1 = QVector3D(1, 0, 0);
     QVector3D m_axisX2 = QVector3D(1, 0, 0);
     QVector3D m_axisY1 = QVector3D(0, 1, 0);

@@ -1,5 +1,6 @@
 #include "examplegeometry.h"
 
+#include <QMetaObject>
 #include <QVector3D>
 
 ExampleTriangleGeometry::ExampleTriangleGeometry()

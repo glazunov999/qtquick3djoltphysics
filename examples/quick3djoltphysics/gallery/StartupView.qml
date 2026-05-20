@@ -172,12 +172,32 @@ Item {
             file: "Constraints/HingeConstraintTest.qml"
         }
         ListElement {
+            name: "Slider Constraint"
+            file: "Constraints/SliderConstraintTest.qml"
+        }
+        ListElement {
             name: "Swing Twist Constraint"
             file: "Constraints/SwingTwistConstraintTest.qml"
         }
         ListElement {
             name: "Fixed Constraint"
             file: "Constraints/FixedConstraintTest.qml"
+        }
+        ListElement {
+            name: "Pulley Constraint"
+            file: "Constraints/PulleyConstraintTest.qml"
+        }
+        ListElement {
+            name: "Gear Constraint"
+            file: "Constraints/GearConstraintTest.qml"
+        }
+        ListElement {
+            name: "Path Constraint"
+            file: "Constraints/PathConstraintTest.qml"
+        }
+        ListElement {
+            name: "Rack And Pinion Constraint"
+            file: "Constraints/RackAndPinionConstraintTest.qml"
         }
     }
 
@@ -190,6 +210,34 @@ Item {
         ListElement {
             name: "Character Virtual"
             file: "Character/CharacterVirtualTest.qml"
+        }
+    }
+
+    ListModel {
+        id: softBodyModel
+        ListElement {
+            name: "Gravity Factor"
+            file: "SoftBody/SoftBodyGravityTest.qml"
+        }
+        ListElement {
+            name: "Kinematic"
+            file: "SoftBody/SoftBodyKinematicTest.qml"
+        }
+        ListElement {
+            name: "Force"
+            file: "SoftBody/SoftBodyForceTest.qml"
+        }
+        ListElement {
+            name: "Restitution"
+            file: "SoftBody/SoftBodyRestitutionTest.qml"
+        }
+        ListElement {
+            name: "Contact Listener"
+            file: "SoftBody/SoftBodyContactListenerTest.qml"
+        }
+        ListElement {
+            name: "Pressure"
+            file: "SoftBody/SoftBodyPressureTest.qml"
         }
     }
 
@@ -269,6 +317,13 @@ Item {
             width: mainView.listItemWidth
             height: count * mainView.listItemHeight
             model: characterModel
+            delegate: listComponent
+        }
+
+        ListView {
+            width: mainView.listItemWidth
+            height: count * mainView.listItemHeight
+            model: softBodyModel
             delegate: listComponent
         }
     }

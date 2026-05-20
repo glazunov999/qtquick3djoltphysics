@@ -40,7 +40,6 @@ private:
     friend class Body;
 
     GroupFilterTable *m_groupFilterTable = nullptr;
-    QMetaObject::Connection m_groupFilterTableSignalConnection;
     quint32 m_groupId = ~quint32(0);
     quint32 m_subGroupId = ~quint32(0);
     JPH::CollisionGroup m_collisionGroup;

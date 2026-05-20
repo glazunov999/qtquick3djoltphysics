@@ -47,6 +47,7 @@ private:
     JPH::SpringSettings getJoltSpringSettings() const;
     friend class DistanceConstraint;
     friend class HingeConstraint;
+    friend class SliderConstraint;
 
     SpringMode m_mode = SpringMode::FrequencyAndDamping;
     float m_frequency = 0.0f;

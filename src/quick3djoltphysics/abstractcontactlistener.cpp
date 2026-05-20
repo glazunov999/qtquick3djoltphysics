@@ -7,6 +7,8 @@
 #include <Jolt/Physics/Collision/ContactListener.h>
 #include <Jolt/Physics/Collision/CollideShape.h>
 
+#include <utility>
+
 static inline AbstractContactListener::CollideShapeResult toCollideShapeResultType(const JPH::CollideShapeResult &inCollisionResult)
 {
     AbstractContactListener::CollideShapeResult collisionResult;
@@ -26,10 +28,10 @@ static inline AbstractContactListener::ContactManifold toContactManifoldType(con
     manifold.worldSpaceNormal = PhysicsUtils::toQtType(inManifold.mWorldSpaceNormal);
     manifold.penetrationDepth = inManifold.mPenetrationDepth;
 
-    for (const auto &point : inManifold.mRelativeContactPointsOn1)
+    for (const auto &point : std::as_const(inManifold.mRelativeContactPointsOn1))
         manifold.relativeContactPointsOn1.push_back(PhysicsUtils::toQtType(point));
 
-    for (const auto &point : inManifold.mRelativeContactPointsOn2)
+    for (const auto &point : std::as_const(inManifold.mRelativeContactPointsOn2))
         manifold.relativeContactPointsOn2.push_back(PhysicsUtils::toQtType(point));
 
     return manifold;

@@ -19,6 +19,28 @@ qt_add_executable(${PROJECT_NAME}
     ../shared/examplecontactlistener.h
     ../shared/examplegeometry.cpp
     ../shared/examplegeometry.h
+    ../shared/examplesoftbodycubesettings.cpp
+    ../shared/examplesoftbodycubesettings.h
+    ../shared/examplesoftbodyspheresettings.cpp
+    ../shared/examplesoftbodyspheresettings.h
+    ../shared/examplesoftbodykinematicspheresettings.cpp
+    ../shared/examplesoftbodykinematicspheresettings.h
+    ../shared/examplesoftbodyclothsettings.cpp
+    ../shared/examplesoftbodyclothsettings.h
+    ../shared/exampleperlin.cpp
+    ../shared/exampleperlin.h
+    ../shared/examplesoftbodyforce.cpp
+    ../shared/examplesoftbodyforce.h
+    ../shared/examplesoftbodycontactlistener.cpp
+    ../shared/examplesoftbodycontactlistener.h
+    ../shared/examplesoftbodycubegeometry.cpp
+    ../shared/examplesoftbodycubegeometry.h
+    ../shared/examplesoftbodycubemeshgeometry.cpp
+    ../shared/examplesoftbodycubemeshgeometry.h
+    ../shared/examplesoftbodyspheremeshgeometry.cpp
+    ../shared/examplesoftbodyspheremeshgeometry.h
+    ../shared/examplesoftbodyclothmeshgeometry.cpp
+    ../shared/examplesoftbodyclothmeshgeometry.h
     ../shared/examplelayers.cpp
     ../shared/examplelayers.h
     ../shared/examplesensorcontactlistener.cpp
@@ -64,7 +86,12 @@ qt_add_qml_module(${PROJECT_NAME}
     QML_FILES Character/CharacterVirtualTest.qml
     QML_FILES Constraints/DistanceConstraintTest.qml
     QML_FILES Constraints/HingeConstraintTest.qml
+    QML_FILES Constraints/SliderConstraintTest.qml
     QML_FILES Constraints/PointConstraintTest.qml
+    QML_FILES Constraints/PulleyConstraintTest.qml
+    QML_FILES Constraints/GearConstraintTest.qml
+    QML_FILES Constraints/PathConstraintTest.qml
+    QML_FILES Constraints/RackAndPinionConstraintTest.qml
     QML_FILES General/ChangeMotionQualityTest.qml
     QML_FILES General/ChangeObjectLayerTest.qml
     QML_FILES General/ChangeShapeTest.qml
@@ -107,6 +134,12 @@ qt_add_qml_module(${PROJECT_NAME}
     QML_FILES CustomSlider.qml
     QML_FILES Constraints/SwingTwistConstraintTest.qml
     QML_FILES Constraints/FixedConstraintTest.qml
+    QML_FILES SoftBody/SoftBodyGravityTest.qml
+    QML_FILES SoftBody/SoftBodyKinematicTest.qml
+    QML_FILES SoftBody/SoftBodyForceTest.qml
+    QML_FILES SoftBody/SoftBodyRestitutionTest.qml
+    QML_FILES SoftBody/SoftBodyContactListenerTest.qml
+    QML_FILES SoftBody/SoftBodyPressureTest.qml
 )
 
 install(TARGETS ${PROJECT_NAME}

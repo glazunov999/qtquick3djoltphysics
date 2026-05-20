@@ -213,7 +213,6 @@ protected:
 
 private:
     CollisionGroup *m_collisionGroup = nullptr;
-    QMetaObject::Connection m_collisionGroupSignalConnection;
     bool m_collisionGroupDirty = false;
     MotionType m_motionType = MotionType::Static;
     MotionQuality m_motionQuality = MotionQuality::Discrete;
@@ -240,6 +239,11 @@ private:
     friend class HingeConstraint;
     friend class SwingTwistConstraint;
     friend class FixedConstraint;
+    friend class PulleyConstraint;
+    friend class GearConstraint;
+    friend class PathConstraint;
+    friend class SliderConstraint;
+    friend class RackAndPinionConstraint;
 };
 
 #endif // PHYSICSBODY_P_H

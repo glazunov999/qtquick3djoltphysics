@@ -119,7 +119,8 @@ void PhysicsSystem::registerPhysicsNode(AbstractPhysicsNode *physicsNode)
 {
     auto *physicsSystem = getPhysicsSystem(physicsNode);
     if (physicsSystem && physicsSystem->m_jolt) {
-        physicsSystem->m_physicsNodes.push_back(physicsNode);
+        if (!physicsSystem->m_physicsNodes.contains(physicsNode))
+            physicsSystem->m_physicsNodes.push_back(physicsNode);
         physicsNode->init(physicsSystem->m_jolt, physicsSystem->m_tempAllocator);
     } else {
         physicsSystemManager.orphanPhysicsNodes.push_back(physicsNode);
@@ -191,19 +192,20 @@ void PhysicsSystem::setSettings(PhysicsSettings *settings)
         return;
 
     if (m_settings)
-        m_settings->disconnect(m_settingsSignalConnection);
+        m_settings->disconnect(this);
 
     m_settings = settings;
-    m_settingsSignalConnection = QObject::connect(m_settings, &PhysicsSettings::changed, this,
-                                                  [this] { m_settingsDirty = true; });
-    QObject::connect(m_settings, &QObject::destroyed, this,
-                     [this](QObject *obj)
-                     {
-                         if (m_settings == obj) {
-                             m_settings = nullptr;
-                             m_settingsDirty = true;
-                         }
-                     });
+
+    if (m_settings) {
+        QObject::connect(m_settings, &PhysicsSettings::changed, this,
+                         [this] { m_settingsDirty = true; });
+        QObject::connect(m_settings, &QObject::destroyed, this,
+                         [this](QObject *obj)
+                         {
+                             if (m_settings == obj)
+                                 setSettings(nullptr);
+                         });
+    }
 
     m_settingsDirty = true;
     emit settingsChanged(m_settings);
@@ -429,20 +431,62 @@ void PhysicsSystem::setContactListener(AbstractContactListener *contactListener)
     if (m_contactListener == contactListener)
         return;
 
+    if (m_contactListener)
+        m_contactListener->disconnect(this);
+
     m_contactListener = contactListener;
 
-    QObject::connect(m_contactListener, &QObject::destroyed, this,
-                     [this]
-                     {
-                         m_contactListener = nullptr;
-                         if (m_jolt)
-                             m_jolt->SetContactListener(nullptr);
-                     });
+    if (m_contactListener) {
+        QObject::connect(m_contactListener, &QObject::destroyed, this,
+                         [this](QObject *obj)
+                         {
+                             if (m_contactListener == obj)
+                                 setContactListener(nullptr);
+                         });
+    }
 
-    if (m_jolt)
-        m_jolt->SetContactListener(m_contactListener->getJoltContactListener());
+    if (m_jolt) {
+        if (m_contactListener)
+            m_jolt->SetContactListener(m_contactListener->getJoltContactListener());
+        else
+            m_jolt->SetContactListener(nullptr);
+    }
 
     emit contactListenerChanged(m_contactListener);
+}
+
+AbstractSoftBodyContactListener *PhysicsSystem::softBodyContactListener() const
+{
+    return m_softBodyContactListener;
+}
+
+void PhysicsSystem::setSoftBodyContactListener(AbstractSoftBodyContactListener *listener)
+{
+    if (m_softBodyContactListener == listener)
+        return;
+
+    if (m_softBodyContactListener)
+        m_softBodyContactListener->disconnect(this);
+
+    m_softBodyContactListener = listener;
+
+    if (m_softBodyContactListener) {
+        QObject::connect(m_softBodyContactListener, &QObject::destroyed, this,
+                         [this](QObject *obj)
+                         {
+                             if (m_softBodyContactListener == obj)
+                                 setSoftBodyContactListener(nullptr);
+                         });
+    }
+
+    if (m_jolt) {
+        if (m_softBodyContactListener)
+            m_jolt->SetSoftBodyContactListener(m_softBodyContactListener->getJoltSoftBodyContactListener());
+        else
+            m_jolt->SetSoftBodyContactListener(nullptr);
+    }
+
+    emit softBodyContactListenerChanged(m_softBodyContactListener);
 }
 
 QQuick3DNode *PhysicsSystem::scene() const
@@ -1030,6 +1074,9 @@ void PhysicsSystem::initPhysics()
     if (m_contactListener)
         m_jolt->SetContactListener(m_contactListener->getJoltContactListener());
 
+    if (m_softBodyContactListener)
+        m_jolt->SetSoftBodyContactListener(m_softBodyContactListener->getJoltSoftBodyContactListener());
+
     m_jolt->SetGravity(PhysicsUtils::toJoltType(m_gravity));
 
     m_physicsInitialized = true;
@@ -1068,7 +1115,8 @@ void PhysicsSystem::findPhysicsNodes()
     while (!children.empty()) {
         auto child = children.takeFirst();
         if (auto converted = qobject_cast<AbstractPhysicsNode *>(child); converted != nullptr) {
-            m_physicsNodes.push_back(converted);
+            if (!m_physicsNodes.contains(converted))
+                m_physicsNodes.push_back(converted);
             converted->init(m_jolt, m_tempAllocator);
             physicsSystemManager.orphanPhysicsNodes.removeAll(converted);
         }

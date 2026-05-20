@@ -488,24 +488,29 @@ void MeshShape::setGeometry(QQuick3DGeometry *newGeometry)
     if (m_geometry == newGeometry)
         return;
     if (m_geometry)
-        m_geometry->disconnect(m_geometrySignalConnection);
+        m_geometry->disconnect(this);
 
     m_geometry = newGeometry;
 
-    connect(m_geometry, &QObject::destroyed, this,
-            [this]
-    {
-        m_geometry = nullptr;
-    });
-    m_geometrySignalConnection = connect(m_geometry, &QQuick3DGeometry::geometryChanged, this,
-            [this]
-    {
-        updateJoltShape();
-    });
+    if (m_geometry != nullptr) {
+        connect(m_geometry, &QObject::destroyed, this,
+                [this](QObject *obj)
+        {
+            if (m_geometry == obj)
+                setGeometry(nullptr);
+        });
+        connect(m_geometry, &QQuick3DGeometry::geometryChanged, this,
+                [this]
+        {
+            updateJoltShape();
+            emit changed();
+        });
+    }
 
     // New geometry means we get a new mesh so deref the old one
     MeshManager::releaseMesh(m_mesh);
-    m_mesh = MeshManager::getMesh(m_geometry);
+    if (m_geometry != nullptr)
+        m_mesh = MeshManager::getMesh(m_geometry);
 
     updateJoltShape();
 

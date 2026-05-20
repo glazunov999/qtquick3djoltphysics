@@ -14,7 +14,12 @@
         <file>Constraints/DistanceConstraintTest.qml</file>
         <file>Constraints/FixedConstraintTest.qml</file>
         <file>Constraints/HingeConstraintTest.qml</file>
+        <file>Constraints/SliderConstraintTest.qml</file>
         <file>Constraints/PointConstraintTest.qml</file>
+        <file>Constraints/PulleyConstraintTest.qml</file>
+        <file>Constraints/GearConstraintTest.qml</file>
+        <file>Constraints/PathConstraintTest.qml</file>
+        <file>Constraints/RackAndPinionConstraintTest.qml</file>
         <file>Constraints/SwingTwistConstraintTest.qml</file>
         <file>General/CenterOfMassTest.qml</file>
         <file>General/ChangeMotionQualityTest.qml</file>
@@ -48,6 +53,12 @@
         <file>Shapes/BoxShapeTest.qml</file>
         <file>Shapes/PlaneShapeTest.qml</file>
         <file>Shapes/HeightFieldShapeTest.qml</file>
+        <file>SoftBody/SoftBodyGravityTest.qml</file>
+        <file>SoftBody/SoftBodyKinematicTest.qml</file>
+        <file>SoftBody/SoftBodyForceTest.qml</file>
+        <file>SoftBody/SoftBodyRestitutionTest.qml</file>
+        <file>SoftBody/SoftBodyContactListenerTest.qml</file>
+        <file>SoftBody/SoftBodyPressureTest.qml</file>
         <file>meshes/Cube.mesh</file>
         <file>images/qt_logo.png</file>
         <file>images/icon_settings.png</file>

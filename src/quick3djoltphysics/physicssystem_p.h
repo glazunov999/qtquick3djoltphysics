@@ -8,6 +8,7 @@
 #include "shapecastresult_p.h"
 #include "triangleresult_p.h"
 #include "abstractcontactlistener.h"
+#include "abstractsoftbodycontactlistener.h"
 #include "qtquick3djoltphysicsglobal_p.h"
 
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
@@ -62,6 +63,7 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT PhysicsSystem : public QObject, public QQmlPar
     Q_PROPERTY(AbstractObjectVsBroadPhaseLayerFilter *objectVsBroadPhaseLayerFilter READ objectVsBroadPhaseLayerFilter WRITE
                    setObjectVsBroadPhaseLayerFilter NOTIFY objectVsBroadPhaseLayerFilterChanged)
     Q_PROPERTY(AbstractContactListener *contactListener READ contactListener WRITE setContactListener NOTIFY contactListenerChanged)
+    Q_PROPERTY(AbstractSoftBodyContactListener *softBodyContactListener READ softBodyContactListener WRITE setSoftBodyContactListener NOTIFY softBodyContactListenerChanged)
     Q_PROPERTY(QQuick3DNode *scene READ scene WRITE setScene NOTIFY sceneChanged)
 
     QML_NAMED_ELEMENT(PhysicsSystem)
@@ -110,6 +112,8 @@ public:
     void setObjectVsBroadPhaseLayerFilter(AbstractObjectVsBroadPhaseLayerFilter *objectVsBroadPhaseLayerFilter);
     AbstractContactListener *contactListener() const;
     void setContactListener(AbstractContactListener *contactListener);
+    AbstractSoftBodyContactListener *softBodyContactListener() const;
+    void setSoftBodyContactListener(AbstractSoftBodyContactListener *listener);
     QQuick3DNode *scene() const;
     void setScene(QQuick3DNode *scene);
 
@@ -148,6 +152,7 @@ signals:
     void broadPhaseLayerChanged(AbstractBroadPhaseLayer *broadPhaseLayer);
     void objectVsBroadPhaseLayerFilterChanged(AbstractObjectVsBroadPhaseLayerFilter *objectVsBroadPhaseLayerFilter);
     void contactListenerChanged(AbstractContactListener *contactListener);
+    void softBodyContactListenerChanged(AbstractSoftBodyContactListener *listener);
     void sceneChanged(QQuick3DNode *scene);
     void updateFrame(float frequency, int collisionSteps);
     void beforeFrameDone(float deltaTime);
@@ -172,7 +177,6 @@ private:
     int m_currentTime = 0;
 
     PhysicsSettings *m_settings = nullptr;
-    QMetaObject::Connection m_settingsSignalConnection;
     bool m_settingsDirty = false;
     QVector3D m_gravity = QVector3D(0.f, -981.f, 0.f);
     bool m_running = true;
@@ -192,6 +196,7 @@ private:
     AbstractBroadPhaseLayer *m_broadPhaseLayer = nullptr;
     AbstractObjectVsBroadPhaseLayerFilter *m_objectVsBroadPhaseLayerFilter = nullptr;
     AbstractContactListener *m_contactListener = nullptr;
+    AbstractSoftBodyContactListener *m_softBodyContactListener = nullptr;
 
     JPH::CharacterVsCharacterCollisionSimple m_characterVsCharacterCollision;
 

@@ -38,7 +38,6 @@ protected:
 private:
     QUrl m_meshSource;
     QQuick3DGeometry *m_geometry = nullptr;
-    QMetaObject::Connection m_geometrySignalConnection;
     float m_activeEdgeCosThresholdAngle = 0.996195f;
 };
 

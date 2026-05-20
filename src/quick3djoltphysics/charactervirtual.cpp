@@ -286,18 +286,26 @@ void CharacterVirtual::setCharacterContactListener(AbstractCharacterContactListe
     if (m_characterContactListener == characterContactListener)
         return;
 
+    if (m_characterContactListener)
+        m_characterContactListener->disconnect(this);
+
     m_characterContactListener = characterContactListener;
 
-    QObject::connect(m_characterContactListener, &QObject::destroyed, this,
-                    [this]
-                    {
-                        m_characterContactListener = nullptr;
-                        if (m_character)
-                            m_character->SetListener(nullptr);
-                    });
+    if (m_characterContactListener) {
+        connect(m_characterContactListener, &QObject::destroyed, this,
+                [this] (QObject *obj) 
+        { 
+            if (m_characterContactListener == obj)
+                setCharacterContactListener(nullptr); 
+        });
+    }
 
-    if (m_character)
-        m_character->SetListener(m_characterContactListener->getJoltCharacterContactListener());
+    if (m_character) {
+        if (m_characterContactListener)
+            m_character->SetListener(m_characterContactListener->getJoltCharacterContactListener());
+        else
+            m_character->SetListener(nullptr);
+    }
 
     emit characterContactListenerChanged(m_characterContactListener);
 }

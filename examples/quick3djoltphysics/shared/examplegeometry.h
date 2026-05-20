@@ -3,6 +3,7 @@
 
 #include <QQuick3DGeometry>
 #include <QByteArray>
+#include <QVector>
 
 class ExampleTriangleGeometry : public QQuick3DGeometry
 {
