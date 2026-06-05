@@ -34,7 +34,7 @@ bool sanitizeSliderLimits(float &limitsMin, float &limitsMax)
 
 } // namespace
 
-SliderConstraint::SliderConstraint(QQuick3DNode *parent) : AbstractPhysicsConstraint(parent)
+SliderConstraint::SliderConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
 {
 }
 
@@ -98,52 +98,6 @@ void SliderConstraint::setAutoDetectPoint(bool autoDetectPoint)
 
     m_autoDetectPoint = autoDetectPoint;
     emit autoDetectPointChanged(m_autoDetectPoint);
-}
-
-Body *SliderConstraint::body1() const
-{
-    return m_body1;
-}
-
-void SliderConstraint::setBody1(Body *body)
-{
-    if (m_body1 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &SliderConstraint::setBody1, body, m_body1);
-    if (m_body1 != nullptr)
-        m_body1->disconnect(m_body1SignalConnection);
-    m_body1 = body;
-    if (m_body1) {
-        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body1Changed(m_body1);
-}
-
-Body *SliderConstraint::body2() const
-{
-    return m_body2;
-}
-
-void SliderConstraint::setBody2(Body *body)
-{
-    if (m_body2 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &SliderConstraint::setBody2, body, m_body2);
-    if (m_body2 != nullptr)
-        m_body2->disconnect(m_body2SignalConnection);
-    m_body2 = body;
-    if (m_body2) {
-        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body2Changed(m_body2);
 }
 
 QVector3D SliderConstraint::sliderAxis1() const
@@ -346,17 +300,13 @@ float SliderConstraint::getCurrentPosition() const
 
 void SliderConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr
-            || m_body1 == nullptr
-            || m_body2 == nullptr
-            || m_body1->m_body == nullptr
-            || m_body2->m_body == nullptr) {
+    if (m_jolt == nullptr || !joltBodiesReady())
         return;
-    }
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
+    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
     m_constraintSettings.mAutoDetectPoint = m_autoDetectPoint;
     m_constraintSettings.mPoint1 = PhysicsUtils::toJoltType(m_point1);
     m_constraintSettings.mPoint2 = PhysicsUtils::toJoltType(m_point2);
@@ -372,6 +322,6 @@ void SliderConstraint::updateJoltObject()
     if (m_limitsSpringSettings)
         m_constraintSettings.mLimitsSpringSettings = m_limitsSpringSettings->getJoltSpringSettings();
 
-    m_constraint = m_constraintSettings.Create(*m_body1->m_body, *m_body2->m_body);
+    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

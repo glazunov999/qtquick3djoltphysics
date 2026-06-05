@@ -1,8 +1,7 @@
 #ifndef PATHCONSTRAINT_P_H
 #define PATHCONSTRAINT_P_H
 
-#include "abstractphysicsconstraint_p.h"
-#include "body_p.h"
+#include "abstracttwobodyphysicsconstraint_p.h"
 #include "pathconstraintpath_p.h"
 #include "motorsettings_p.h"
 
@@ -16,11 +15,9 @@
 #include <QVector3D>
 #include <QQuaternion>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraint : public AbstractPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraint : public AbstractTwoBodyPhysicsConstraint
 {
     Q_OBJECT
-    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
-    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
     Q_PROPERTY(PathConstraintPathBase *path READ path WRITE setPath NOTIFY pathChanged)
     Q_PROPERTY(QVector3D pathPosition READ pathPosition WRITE setPathPosition NOTIFY pathPositionChanged)
     Q_PROPERTY(QQuaternion pathRotation READ pathRotation WRITE setPathRotation NOTIFY pathRotationChanged)
@@ -52,12 +49,6 @@ public:
         Position,
     };
     Q_ENUM(MotorState)
-
-    Body *body1() const;
-    void setBody1(Body *body);
-
-    Body *body2() const;
-    void setBody2(Body *body);
 
     PathConstraintPathBase *path() const;
     void setPath(PathConstraintPathBase *path);
@@ -94,8 +85,6 @@ public:
     Q_INVOKABLE float getTotalLambdaPositionLimits() const;
 
 signals:
-    void body1Changed(Body *body1);
-    void body2Changed(Body *body2);
     void pathChanged(PathConstraintPathBase *path);
     void pathPositionChanged(const QVector3D &pathPosition);
     void pathRotationChanged(const QQuaternion &pathRotation);
@@ -114,16 +103,12 @@ private:
     void applyRuntimeMotorSettings();
     void applyRuntimePath();
 
-    Body *m_body1 = nullptr;
-    Body *m_body2 = nullptr;
     PathConstraintPathBase *m_path = nullptr;
     QVector3D m_pathPosition;
     QQuaternion m_pathRotation;
     float m_pathFraction = 0.0f;
     float m_maxFrictionForce = 0.0f;
     MotorSettings *m_positionMotorSettings = nullptr;
-    QMetaObject::Connection m_body1SignalConnection;
-    QMetaObject::Connection m_body2SignalConnection;
     QMetaObject::Connection m_pathSignalConnection;
     QMetaObject::Connection m_motorSettingsConnection;
     RotationConstraintType m_rotationConstraintType = RotationConstraintType::Free;

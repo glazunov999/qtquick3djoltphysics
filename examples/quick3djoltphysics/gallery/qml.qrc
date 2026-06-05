@@ -11,6 +11,7 @@
         <file>AppSettings.qml</file>
         <file>Character/CharacterVirtualTest.qml</file>
         <file>Character/CharacterTest.qml</file>
+        <file>Constraints/ConeConstraintTest.qml</file>
         <file>Constraints/DistanceConstraintTest.qml</file>
         <file>Constraints/FixedConstraintTest.qml</file>
         <file>Constraints/HingeConstraintTest.qml</file>

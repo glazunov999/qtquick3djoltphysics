@@ -5,57 +5,11 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-PathConstraint::PathConstraint(QQuick3DNode *parent) : AbstractPhysicsConstraint(parent)
+PathConstraint::PathConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
 {
 }
 
 PathConstraint::~PathConstraint() = default;
-
-Body *PathConstraint::body1() const
-{
-    return m_body1;
-}
-
-void PathConstraint::setBody1(Body *body)
-{
-    if (m_body1 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &PathConstraint::setBody1, body, m_body1);
-    if (m_body1 != nullptr)
-        m_body1->disconnect(m_body1SignalConnection);
-    m_body1 = body;
-    if (m_body1) {
-        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body1Changed(m_body1);
-}
-
-Body *PathConstraint::body2() const
-{
-    return m_body2;
-}
-
-void PathConstraint::setBody2(Body *body)
-{
-    if (m_body2 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &PathConstraint::setBody2, body, m_body2);
-    if (m_body2 != nullptr)
-        m_body2->disconnect(m_body2SignalConnection);
-    m_body2 = body;
-    if (m_body2) {
-        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body2Changed(m_body2);
-}
 
 PathConstraintPathBase *PathConstraint::path() const
 {
@@ -325,13 +279,8 @@ void PathConstraint::applyRuntimePath()
 
 void PathConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr
-            || m_body1 == nullptr
-            || m_body2 == nullptr
-            || m_body1->m_body == nullptr
-            || m_body2->m_body == nullptr) {
+    if (m_jolt == nullptr || !joltBodiesReady())
         return;
-    }
 
     if (!m_path) {
         return;
@@ -368,7 +317,7 @@ void PathConstraint::updateJoltObject()
         m_constraintSettings.mPositionMotorSettings =
             m_positionMotorSettings->getJoltMotorSettings();
 
-    m_constraint = m_constraintSettings.Create(*m_body1->m_body, *m_body2->m_body);
+    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 
     auto *pc = static_cast<JPH::PathConstraint *>(m_constraint);

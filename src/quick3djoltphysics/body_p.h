@@ -234,6 +234,7 @@ private:
 
     bool m_simulationEnabled = true;
 
+    friend class AbstractTwoBodyPhysicsConstraint;
     friend class PointConstraint;
     friend class DistanceConstraint;
     friend class HingeConstraint;

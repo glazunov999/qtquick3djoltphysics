@@ -8,57 +8,11 @@
 #include <QtMath>
 
 RackAndPinionConstraint::RackAndPinionConstraint(QQuick3DNode *parent)
-    : AbstractPhysicsConstraint(parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
 {
 }
 
 RackAndPinionConstraint::~RackAndPinionConstraint() = default;
-
-Body *RackAndPinionConstraint::body1() const
-{
-    return m_body1;
-}
-
-void RackAndPinionConstraint::setBody1(Body *body)
-{
-    if (m_body1 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &RackAndPinionConstraint::setBody1, body, m_body1);
-    if (m_body1 != nullptr)
-        m_body1->disconnect(m_body1SignalConnection);
-    m_body1 = body;
-    if (m_body1) {
-        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
-                                                 [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body1Changed(m_body1);
-}
-
-Body *RackAndPinionConstraint::body2() const
-{
-    return m_body2;
-}
-
-void RackAndPinionConstraint::setBody2(Body *body)
-{
-    if (m_body2 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &RackAndPinionConstraint::setBody2, body, m_body2);
-    if (m_body2 != nullptr)
-        m_body2->disconnect(m_body2SignalConnection);
-    m_body2 = body;
-    if (m_body2) {
-        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
-                                                 [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body2Changed(m_body2);
-}
 
 QVector3D RackAndPinionConstraint::hingeAxis() const
 {
@@ -235,23 +189,18 @@ void RackAndPinionConstraint::linkRackAndPinionConstraints()
 
 void RackAndPinionConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr
-            || m_body1 == nullptr
-            || m_body2 == nullptr
-            || m_body1->m_body == nullptr
-            || m_body2->m_body == nullptr) {
+    if (m_jolt == nullptr || !joltBodiesReady())
         return;
-    }
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = JPH::EConstraintSpace::WorldSpace;
+    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
     m_constraintSettings.mHingeAxis = PhysicsUtils::toJoltType(m_hingeAxis);
     m_constraintSettings.mSliderAxis = PhysicsUtils::toJoltType(m_sliderAxis);
     m_constraintSettings.mRatio = m_ratio;
 
-    m_constraint = m_constraintSettings.Create(*m_body1->m_body, *m_body2->m_body);
+    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
     linkRackAndPinionConstraints();
 }

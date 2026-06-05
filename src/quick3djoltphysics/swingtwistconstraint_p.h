@@ -1,8 +1,7 @@
 #ifndef SWINGTWISTCONSTRAINT_P_H
 #define SWINGTWISTCONSTRAINT_P_H
 
-#include "abstractphysicsconstraint_p.h"
-#include "body_p.h"
+#include "abstracttwobodyphysicsconstraint_p.h"
 
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
 #include <QtQuick3D/private/qquick3dnode_p.h>
@@ -13,11 +12,9 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraint : public AbstractPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraint : public AbstractTwoBodyPhysicsConstraint
 {
     Q_OBJECT
-    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
-    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
     Q_PROPERTY(QVector3D position1 READ position1 WRITE setPosition1 NOTIFY position1Changed)
     Q_PROPERTY(QVector3D position2 READ position2 WRITE setPosition2 NOTIFY position2Changed)
     Q_PROPERTY(QVector3D twistAxis1 READ twistAxis1 WRITE setTwistAxis1 NOTIFY twistAxis1Changed)
@@ -40,12 +37,6 @@ public:
         Pyramid,
     };
     Q_ENUM(SwingType)
-
-    Body *body1() const;
-    void setBody1(Body *body);
-
-    Body *body2() const;
-    void setBody2(Body *body);
 
     QVector3D position1() const;
     void setPosition1(const QVector3D &position1);
@@ -84,8 +75,6 @@ public:
     void setMaxFrictionTorque(float maxFrictionTorque);
 
 signals:
-    void body1Changed(Body *body1);
-    void body2Changed(Body *body2);
     void position1Changed(const QVector3D &position1);
     void position2Changed(const QVector3D &position2);
     void twistAxis1Changed(const QVector3D &twistAxis1);
@@ -103,10 +92,6 @@ protected:
     void updateJoltObject() override;
 
 private:
-    Body *m_body1 = nullptr;
-    Body *m_body2 = nullptr;
-    QMetaObject::Connection m_body1SignalConnection;
-    QMetaObject::Connection m_body2SignalConnection;
     QVector3D m_position1;
     QVector3D m_position2;
     QVector3D m_twistAxis1 = QVector3D(1, 0, 0);

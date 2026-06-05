@@ -1,8 +1,7 @@
 #ifndef SLIDERCONSTRAINT_P_H
 #define SLIDERCONSTRAINT_P_H
 
-#include "abstractphysicsconstraint_p.h"
-#include "body_p.h"
+#include "abstracttwobodyphysicsconstraint_p.h"
 #include "springsettings_p.h"
 
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
@@ -16,14 +15,12 @@
 
 #include <cfloat>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraint : public AbstractPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraint : public AbstractTwoBodyPhysicsConstraint
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
     Q_PROPERTY(QVector3D point2 READ point2 WRITE setPoint2 NOTIFY point2Changed)
     Q_PROPERTY(bool autoDetectPoint READ autoDetectPoint WRITE setAutoDetectPoint NOTIFY autoDetectPointChanged)
-    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
-    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
     Q_PROPERTY(QVector3D sliderAxis1 READ sliderAxis1 WRITE setSliderAxis1 NOTIFY sliderAxis1Changed)
     Q_PROPERTY(QVector3D sliderAxis2 READ sliderAxis2 WRITE setSliderAxis2 NOTIFY sliderAxis2Changed)
     Q_PROPERTY(QVector3D normalAxis1 READ normalAxis1 WRITE setNormalAxis1 NOTIFY normalAxis1Changed)
@@ -45,12 +42,6 @@ public:
 
     bool autoDetectPoint() const;
     void setAutoDetectPoint(bool autoDetectPoint);
-
-    Body *body1() const;
-    void setBody1(Body *body);
-
-    Body *body2() const;
-    void setBody2(Body *body);
 
     QVector3D sliderAxis1() const;
     void setSliderAxis1(const QVector3D &sliderAxis1);
@@ -82,8 +73,6 @@ signals:
     void point1Changed(const QVector3D &point);
     void point2Changed(const QVector3D &point);
     void autoDetectPointChanged(bool autoDetectPoint);
-    void body1Changed(Body *body1);
-    void body2Changed(Body *body2);
     void sliderAxis1Changed(const QVector3D &sliderAxis1);
     void sliderAxis2Changed(const QVector3D &sliderAxis2);
     void normalAxis1Changed(const QVector3D &normalAxis1);
@@ -102,10 +91,6 @@ private:
     QVector3D m_point1;
     QVector3D m_point2;
     bool m_autoDetectPoint = true;
-    Body *m_body1 = nullptr;
-    Body *m_body2 = nullptr;
-    QMetaObject::Connection m_body1SignalConnection;
-    QMetaObject::Connection m_body2SignalConnection;
     QVector3D m_sliderAxis1 = QVector3D(1, 0, 0);
     QVector3D m_sliderAxis2 = QVector3D(1, 0, 0);
     QVector3D m_normalAxis1 = QVector3D(0, 1, 0);

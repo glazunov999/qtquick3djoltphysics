@@ -5,57 +5,11 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-SwingTwistConstraint::SwingTwistConstraint(QQuick3DNode *parent) : AbstractPhysicsConstraint(parent)
+SwingTwistConstraint::SwingTwistConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
 {
 }
 
 SwingTwistConstraint::~SwingTwistConstraint() = default;
-
-Body *SwingTwistConstraint::body1() const
-{
-    return m_body1;
-}
-
-void SwingTwistConstraint::setBody1(Body *body)
-{
-    if (m_body1 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &SwingTwistConstraint::setBody1, body, m_body1);
-    if (m_body1 != nullptr)
-        m_body1->disconnect(m_body1SignalConnection);
-    m_body1 = body;
-    if (m_body1) {
-        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body1Changed(m_body1);
-}
-
-Body *SwingTwistConstraint::body2() const
-{
-    return m_body2;
-}
-
-void SwingTwistConstraint::setBody2(Body *body)
-{
-    if (m_body2 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &SwingTwistConstraint::setBody2, body, m_body2);
-    if (m_body2 != nullptr)
-        m_body2->disconnect(m_body2SignalConnection);
-    m_body2 = body;
-    if (m_body2) {
-        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body2Changed(m_body2);
-}
 
 QVector3D SwingTwistConstraint::position1() const
 {
@@ -284,17 +238,13 @@ void SwingTwistConstraint::setMaxFrictionTorque(float maxFrictionTorque)
 
 void SwingTwistConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr
-            || m_body1 == nullptr
-            || m_body2 == nullptr
-            || m_body1->m_body == nullptr
-            || m_body2->m_body == nullptr) {
+    if (m_jolt == nullptr || !joltBodiesReady())
         return;
-    }
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
+    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
     m_constraintSettings.mPosition1 = PhysicsUtils::toJoltType(m_position1);
     m_constraintSettings.mPosition2 = PhysicsUtils::toJoltType(m_position2);
     m_constraintSettings.mTwistAxis1 = PhysicsUtils::toJoltType(m_twistAxis1);
@@ -306,6 +256,6 @@ void SwingTwistConstraint::updateJoltObject()
     m_constraintSettings.mTwistMinAngle = qDegreesToRadians(m_twistMinAngle);
     m_constraintSettings.mTwistMaxAngle = qDegreesToRadians(m_twistMaxAngle);
 
-    m_constraint = m_constraintSettings.Create(*m_body1->m_body, *m_body2->m_body);
+    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

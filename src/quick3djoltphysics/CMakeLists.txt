@@ -14,6 +14,7 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         abstractphysicsbody_p.h abstractphysicsbody.cpp
         abstractphysicscharacter_p.h abstractphysicscharacter.cpp
         abstractphysicsconstraint_p.h abstractphysicsconstraint.cpp
+        abstracttwobodyphysicsconstraint_p.h abstracttwobodyphysicsconstraint.cpp
         abstractphysicsnode_p.h abstractphysicsnode.cpp
         abstractshape_p.h abstractshape.cpp
         abstractsoftbodycontactlistener.h abstractsoftbodycontactlistener.cpp
@@ -25,6 +26,7 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         charactervirtual_p.h charactervirtual.cpp
         collideshaperesult_p.h collideshaperesult.cpp
         collisiongroup_p.h collisiongroup.cpp
+        coneconstraint_p.h coneconstraint.cpp
         abstractcontactlistener.h abstractcontactlistener.cpp
         convexhullshape_p.h convexhullshape.cpp
         cylindershape_p.h cylindershape.cpp

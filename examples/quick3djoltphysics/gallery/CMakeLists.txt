@@ -84,6 +84,7 @@ qt_add_qml_module(${PROJECT_NAME}
     NO_RESOURCE_TARGET_PATH
     QML_FILES AppSettings.qml
     QML_FILES Character/CharacterVirtualTest.qml
+    QML_FILES Constraints/ConeConstraintTest.qml
     QML_FILES Constraints/DistanceConstraintTest.qml
     QML_FILES Constraints/HingeConstraintTest.qml
     QML_FILES Constraints/SliderConstraintTest.qml

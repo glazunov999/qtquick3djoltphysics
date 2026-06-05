@@ -5,7 +5,7 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-HingeConstraint::HingeConstraint(QQuick3DNode *parent) : AbstractPhysicsConstraint(parent)
+HingeConstraint::HingeConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
 {
 }
 
@@ -49,52 +49,6 @@ void HingeConstraint::setPoint2(const QVector3D &point)
 
     m_point2 = point;
     emit point2Changed(m_point2);
-}
-
-Body *HingeConstraint::body1() const
-{
-    return m_body1;
-}
-
-void HingeConstraint::setBody1(Body *body)
-{
-    if (m_body1 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &HingeConstraint::setBody1, body, m_body1);
-    if (m_body1 != nullptr)
-        m_body1->disconnect(m_body1SignalConnection);
-    m_body1 = body;
-    if (m_body1) {
-        m_body1SignalConnection = QObject::connect(m_body1, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body1Changed(m_body1);
-}
-
-Body *HingeConstraint::body2() const
-{
-    return m_body2;
-}
-
-void HingeConstraint::setBody2(Body *body)
-{
-    if (m_body2 == body)
-        return;
-
-    QQuick3DObjectPrivate::attachWatcher(this, &HingeConstraint::setBody2, body, m_body2);
-    if (m_body2 != nullptr)
-        m_body2->disconnect(m_body2SignalConnection);
-    m_body2 = body;
-    if (m_body2) {
-        m_body2SignalConnection = QObject::connect(m_body2, &Body::bodyIDChanged, this,
-                                                   [this] { updateJoltObject(); });
-    }
-
-    updateJoltObject();
-    emit body2Changed(m_body2);
 }
 
 QVector3D HingeConstraint::hingeAxis1() const
@@ -272,17 +226,13 @@ void HingeConstraint::setMaxFrictionTorque(float maxFrictionTorque)
 
 void HingeConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr
-            || m_body1 == nullptr
-            || m_body2 == nullptr
-            || m_body1->m_body == nullptr
-            || m_body2->m_body == nullptr) {
+    if (m_jolt == nullptr || !joltBodiesReady())
         return;
-    }
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
+    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
     m_constraintSettings.mPoint1 = PhysicsUtils::toJoltType(m_point1);
     m_constraintSettings.mPoint2 = PhysicsUtils::toJoltType(m_point2);
     m_constraintSettings.mHingeAxis1 = PhysicsUtils::toJoltType(m_hingeAxis1);
@@ -295,6 +245,6 @@ void HingeConstraint::updateJoltObject()
     if (m_limitsSpringSettings)
         m_constraintSettings.mLimitsSpringSettings = m_limitsSpringSettings->getJoltSpringSettings();
 
-    m_constraint = m_constraintSettings.Create(*m_body1->m_body, *m_body2->m_body);
+    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

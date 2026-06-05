@@ -164,6 +164,10 @@ Item {
             file: "Constraints/PointConstraintTest.qml"
         }
         ListElement {
+            name: "Cone Constraint"
+            file: "Constraints/ConeConstraintTest.qml"
+        }
+        ListElement {
             name: "Distance Constraint"
             file: "Constraints/DistanceConstraintTest.qml"
         }

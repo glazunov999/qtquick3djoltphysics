@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-**Qt Quick 3D Jolt Physics** is an alternative high-level API for physics simulation in **Qt Quick 3D**, powered by the **Jolt Physics** engine. It targets desktop and **WebAssembly**, with a declarative QML module `QtQuick3D.JoltPhysics` (and helpers in `QtQuick3D.JoltPhysics.Helpers`).
+**Qt Quick 3D Jolt Physics** is an alternative high-level API for physics simulation in **Qt Quick 3D**, powered by the **[Jolt Physics](https://github.com/jrouwe/JoltPhysics)** engine. It targets desktop and **WebAssembly**, with a declarative QML module `QtQuick3D.JoltPhysics` (and helpers in `QtQuick3D.JoltPhysics.Helpers`).
 
 The API is modeled after [Qt Quick 3D Physics](https://doc.qt.io/qt-6/qtquick3dphysics-index.html) (PhysX), but it is a **separate module** — use `import QtQuick3D.JoltPhysics`, not `import QtQuick3D.Physics`.
 
@@ -21,7 +21,7 @@ The API is modeled after [Qt Quick 3D Physics](https://doc.qt.io/qt-6/qtquick3dp
 - ⚡ **High performance** — multi-threaded simulation via Jolt's job system (on platforms that support it).
 - 🌐 **WebAssembly** — Jolt and this module can be built for Qt's `wasm_singlethread` / `wasm_multithread` kits.
 - 📦 **Shapes** (QML types): `BoxShape`, `SphereShape`, `CapsuleShape`, `CylinderShape`, `PlaneShape`, `ConvexHullShape`, `MeshShape`, `HeightFieldShape`, `EmptyShape`, `RotatedTranslatedShape`, `StaticCompoundShape`.
-- ⛓️ **Constraints**: `PointConstraint`, `DistanceConstraint`, `HingeConstraint`, `SliderConstraint`, `FixedConstraint`, `GearConstraint`, `PathConstraint`, `PulleyConstraint`, `RackAndPinionConstraint`, `SwingTwistConstraint`.
+- ⛓️ **Constraints**: `PointConstraint`, `DistanceConstraint`, `HingeConstraint`, `SliderConstraint`, `FixedConstraint`, `ConeConstraint`, `GearConstraint`, `PathConstraint`, `PulleyConstraint`, `RackAndPinionConstraint`, `SwingTwistConstraint`.
 - 🚶 **Characters** — `Character`, `CharacterVirtual`, and related listeners.
 - 👕 **Soft bodies** — `SoftBody`, `SoftBodyMeshGeometry`, `SoftBodySharedSettings`, and related types.
 - 🎨 **Declarative QML** — `PhysicsSystem`, `Body`, layers/filters, contact listeners, and more.
@@ -66,11 +66,9 @@ cmake -B build -DCMAKE_PREFIX_PATH=/path/to/Qt/6.9.3/gcc_64 -DQT_BUILD_EXAMPLES=
 cmake --build build --parallel
 ```
 
-CMake builds three examples: **simple**, **customshapes**, **gallery**:
+The default build includes the **gallery** example:
 
 ```bash
-./build/examples/quick3djoltphysics/simple/example_simple
-./build/examples/quick3djoltphysics/customshapes/example_customshapes
 ./build/examples/quick3djoltphysics/gallery/example_gallery
 ```
 
@@ -89,23 +87,33 @@ cmake --build build-wasm --parallel
 cmake --install build-wasm
 ```
 
-Consumer apps (e.g. [Kwayk](https://github.com/glazunov999/Kwayk)) must also be built against the same wasm Qt kit with this module installed into that prefix.
+Consumer apps must also be built against the same wasm Qt kit with this module installed into that prefix.
 
 ---
 
 ## 🎮 Examples in the repository
 
-| Directory | In default CMake/qmake build | Description |
-|-----------|------------------------------|-------------|
-| `simple` | yes | Basic rigid bodies on a plane |
-| `customshapes` | yes | Custom geometry as colliders |
+| Directory | In default CMake build | Description |
+|-----------|------------------------|-------------|
 | `gallery` | yes | Large set of shape/constraint/soft-body/character tests |
+| `simple` | no* | Basic rigid bodies on a plane |
+| `customshapes` | no* | Custom geometry as colliders |
+| `joints` | no* | Prismatic, revolute, and rope joints |
 | `cannon` | no* | Shooting / impulse demo |
 | `charactercontroller` | no* | Walkable character in a scene |
 | `compoundshapes` | no* | Linked compound colliders |
 | `impeller` | no* | Rotating impeller and sensor zones |
 
-\*These have local `CMakeLists.txt` / `.pro` files; build them from their directory after the module is installed, e.g. `cmake -S examples/quick3djoltphysics/cannon -B cannon-build` with `CMAKE_PREFIX_PATH` set to your Qt prefix.
+\*These have local `CMakeLists.txt` files; build them from their directory after the module is installed, e.g.:
+
+```bash
+cmake -S examples/quick3djoltphysics/joints -B joints-build \
+  -DCMAKE_PREFIX_PATH=/path/to/Qt/6.9.3/gcc_64
+cmake --build joints-build
+./joints-build/example_joints
+```
+
+---
 
 ## 🛡️ License
 

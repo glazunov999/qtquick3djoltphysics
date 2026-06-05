@@ -1,8 +1,7 @@
 #ifndef HINGECONSTRAINT_P_H
 #define HINGECONSTRAINT_P_H
 
-#include "abstractphysicsconstraint_p.h"
-#include "body_p.h"
+#include "abstracttwobodyphysicsconstraint_p.h"
 #include "springsettings_p.h"
 
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
@@ -17,13 +16,11 @@
 
 class GearConstraint;
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraint : public AbstractPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraint : public AbstractTwoBodyPhysicsConstraint
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
     Q_PROPERTY(QVector3D point2 READ point2 WRITE setPoint2 NOTIFY point2Changed)
-    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
-    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
     Q_PROPERTY(QVector3D hingeAxis1 READ hingeAxis1 WRITE setHingeAxis1 NOTIFY hingeAxis1Changed)
     Q_PROPERTY(QVector3D hingeAxis2 READ hingeAxis2 WRITE setHingeAxis2 NOTIFY hingeAxis2Changed)
     Q_PROPERTY(QVector3D normalAxis1 READ normalAxis1 WRITE setNormalAxis1 NOTIFY normalAxis1Changed)
@@ -42,12 +39,6 @@ public:
 
     QVector3D point2() const;
     void setPoint2(const QVector3D &point);
-
-    Body *body1() const;
-    void setBody1(Body *body);
-
-    Body *body2() const;
-    void setBody2(Body *body);
 
     QVector3D hingeAxis1() const;
     void setHingeAxis1(const QVector3D &hingeAxis1);
@@ -76,8 +67,6 @@ public:
 signals:
     void point1Changed(const QVector3D &point);
     void point2Changed(const QVector3D &point);
-    void body1Changed(Body *body1);
-    void body2Changed(Body *body2);
     void hingeAxis1Changed(const QVector3D &hingeAxis1);
     void hingeAxis2Changed(const QVector3D &hingeAxis2);
     void normalAxis1Changed(const QVector3D &normalAxis1);
@@ -93,10 +82,6 @@ protected:
 private:
     QVector3D m_point1;
     QVector3D m_point2;
-    Body *m_body1 = nullptr;
-    Body *m_body2 = nullptr;
-    QMetaObject::Connection m_body1SignalConnection;
-    QMetaObject::Connection m_body2SignalConnection;
     QVector3D m_hingeAxis1 = QVector3D(0, 1, 0);
     QVector3D m_hingeAxis2 = QVector3D(0, 1, 0);
     QVector3D m_normalAxis1 = QVector3D(1, 0, 0);
