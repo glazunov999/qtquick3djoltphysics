@@ -122,3 +122,7 @@ cmake --build joints-build
 ### Third-party components
 
 This repository bundles the **[Jolt Physics Library](https://github.com/jrouwe/JoltPhysics)**, which is also licensed under the **MIT License** (Copyright © Jorrit Rouwe).
+
+Some **example assets** (meshes, textures, and a few source files) are derived from [Qt Quick 3D Physics](https://doc.qt.io/qt-6/qtquick3dphysics-index.html) examples under **BSD-3-Clause**, with additional **CC0** textures from [ambientCG](https://ambientcg.com/). See **[examples/ATTRIBUTION.md](examples/ATTRIBUTION.md)** for the full list and required notices.
+
+The module API is modeled after Qt Quick 3D Physics, but the implementation is independent and does not include GPL-licensed source code from that module.
