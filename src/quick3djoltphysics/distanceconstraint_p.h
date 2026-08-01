@@ -13,7 +13,7 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT DistanceConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT DistanceConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
@@ -21,16 +21,15 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT DistanceConstraint : public AbstractTwoBodyPhy
     Q_PROPERTY(float minDistance READ minDistance WRITE setMinDistance NOTIFY minDistanceChanged)
     Q_PROPERTY(float maxDistance READ maxDistance WRITE setMaxDistance NOTIFY maxDistanceChanged)
     Q_PROPERTY(SpringSettings *limitsSpringSettings READ limitsSpringSettings WRITE setLimitsSpringSettings NOTIFY limitsSpringSettingsChanged)
-    QML_NAMED_ELEMENT(DistanceConstraint)
+    QML_NAMED_ELEMENT(DistanceConstraintSettings)
 public:
-    explicit DistanceConstraint(QQuick3DNode *parent = nullptr);
-    ~DistanceConstraint() override;
+    explicit DistanceConstraintSettings(QObject *parent = nullptr);
 
     QVector3D point1() const;
-    void setPoint1(const QVector3D &point);
+    void setPoint1(const QVector3D &point1);
 
     QVector3D point2() const;
-    void setPoint2(const QVector3D &point);
+    void setPoint2(const QVector3D &point2);
 
     float minDistance() const;
     void setMinDistance(float minDistance);
@@ -41,21 +40,45 @@ public:
     SpringSettings *limitsSpringSettings() const;
     void setLimitsSpringSettings(SpringSettings *limitsSpringSettings);
 
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
 signals:
-    void point1Changed(const QVector3D &point);
-    void point2Changed(const QVector3D &point);
+    void point1Changed(const QVector3D &point1);
+    void point2Changed(const QVector3D &point2);
     void minDistanceChanged(float minDistance);
     void maxDistanceChanged(float maxDistance);
     void limitsSpringSettingsChanged(SpringSettings *limitsSpringSettings);
+
+private:
+    QVector3D m_point1;
+    QVector3D m_point2;
+    float m_minDistance = -1.0f;
+    float m_maxDistance = -1.0f;
+    SpringSettings *m_limitsSpringSettings = nullptr;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT DistanceConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(DistanceConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(DistanceConstraint)
+public:
+    explicit DistanceConstraint(QQuick3DNode *parent = nullptr);
+    ~DistanceConstraint() override;
+
+    DistanceConstraintSettings *settings() const;
+    void setSettings(DistanceConstraintSettings *settings);
+
+signals:
+    void settingsChanged(DistanceConstraintSettings *settings);
 
 protected:
     void updateJoltObject() override;
 
 private:
-    QVector3D m_point1;
-    QVector3D m_point2;
-    SpringSettings *m_limitsSpringSettings = nullptr;
-    JPH::DistanceConstraintSettings m_constraintSettings;
+    DistanceConstraintSettings *m_settings = nullptr;
 };
 
 #endif // DISTANCECONSTRAINT_P_H

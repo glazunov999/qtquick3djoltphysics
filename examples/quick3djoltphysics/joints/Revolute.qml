@@ -70,14 +70,16 @@ Node {
     HingeConstraint {
         body1: revoluteBoxA
         body2: revoluteBoxB
-        space: HingeConstraint.LocalToBodyCOM
-        point1: Qt.vector3d(attachX, 0, 0)
-        point2: Qt.vector3d(attachX, 0, 0)
-        hingeAxis1: Qt.vector3d(1, 0, 0)
-        normalAxis1: Qt.vector3d(0, 1, 0)
-        hingeAxis2: Qt.vector3d(0, 1, 0)
-        normalAxis2: Qt.vector3d(-1, 0, 0)
-        limitsMin: -45
-        limitsMax: 45
+        settings: HingeConstraintSettings {
+            space: PhysicsTwoBodyConstraintSettings.LocalToBodyCOM
+            point1: Qt.vector3d(attachX, 0, 0)
+            point2: Qt.vector3d(attachX, 0, 0)
+            hingeAxis1: Qt.vector3d(1, 0, 0)
+            normalAxis1: Qt.vector3d(0, 1, 0)
+            hingeAxis2: Qt.vector3d(0, 1, 0)
+            normalAxis2: Qt.vector3d(-1, 0, 0)
+            limitsMin: -45
+            limitsMax: 45
+        }
     }
 }

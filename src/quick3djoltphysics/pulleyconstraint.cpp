@@ -5,155 +5,182 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-PulleyConstraint::PulleyConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
+PulleyConstraintSettings::PulleyConstraintSettings(QObject *parent)
+    : AbstractTwoBodyPhysicsConstraintSettings(parent)
 {
 }
 
-PulleyConstraint::~PulleyConstraint() = default;
-
-QVector3D PulleyConstraint::bodyPoint1() const
+QVector3D PulleyConstraintSettings::bodyPoint1() const
 {
     return m_bodyPoint1;
 }
 
-void PulleyConstraint::setBodyPoint1(const QVector3D &point)
+void PulleyConstraintSettings::setBodyPoint1(const QVector3D &bodyPoint1)
 {
-    if (m_bodyPoint1 == point)
+    if (m_bodyPoint1 == bodyPoint1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'bodyPoint1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_bodyPoint1 = point;
+    m_bodyPoint1 = bodyPoint1;
     emit bodyPoint1Changed(m_bodyPoint1);
+    emit changed();
 }
 
-QVector3D PulleyConstraint::fixedPoint1() const
+QVector3D PulleyConstraintSettings::fixedPoint1() const
 {
     return m_fixedPoint1;
 }
 
-void PulleyConstraint::setFixedPoint1(const QVector3D &point)
+void PulleyConstraintSettings::setFixedPoint1(const QVector3D &fixedPoint1)
 {
-    if (m_fixedPoint1 == point)
+    if (m_fixedPoint1 == fixedPoint1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'fixedPoint1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_fixedPoint1 = point;
+    m_fixedPoint1 = fixedPoint1;
     emit fixedPoint1Changed(m_fixedPoint1);
+    emit changed();
 }
 
-QVector3D PulleyConstraint::bodyPoint2() const
+QVector3D PulleyConstraintSettings::bodyPoint2() const
 {
     return m_bodyPoint2;
 }
 
-void PulleyConstraint::setBodyPoint2(const QVector3D &point)
+void PulleyConstraintSettings::setBodyPoint2(const QVector3D &bodyPoint2)
 {
-    if (m_bodyPoint2 == point)
+    if (m_bodyPoint2 == bodyPoint2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'bodyPoint2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_bodyPoint2 = point;
+    m_bodyPoint2 = bodyPoint2;
     emit bodyPoint2Changed(m_bodyPoint2);
+    emit changed();
 }
 
-QVector3D PulleyConstraint::fixedPoint2() const
+QVector3D PulleyConstraintSettings::fixedPoint2() const
 {
     return m_fixedPoint2;
 }
 
-void PulleyConstraint::setFixedPoint2(const QVector3D &point)
+void PulleyConstraintSettings::setFixedPoint2(const QVector3D &fixedPoint2)
 {
-    if (m_fixedPoint2 == point)
+    if (m_fixedPoint2 == fixedPoint2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'fixedPoint2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_fixedPoint2 = point;
+    m_fixedPoint2 = fixedPoint2;
     emit fixedPoint2Changed(m_fixedPoint2);
+    emit changed();
 }
 
-float PulleyConstraint::ratio() const
+float PulleyConstraintSettings::ratio() const
 {
     return m_ratio;
 }
 
-void PulleyConstraint::setRatio(float ratio)
+void PulleyConstraintSettings::setRatio(float ratio)
 {
     if (qFuzzyCompare(m_ratio, ratio))
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'ratio' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_ratio = ratio;
     emit ratioChanged(m_ratio);
+    emit changed();
 }
 
-float PulleyConstraint::minLength() const
+float PulleyConstraintSettings::minLength() const
 {
     return m_minLength;
 }
 
-void PulleyConstraint::setMinLength(float minLength)
+void PulleyConstraintSettings::setMinLength(float minLength)
 {
     if (qFuzzyCompare(m_minLength, minLength))
         return;
 
     m_minLength = minLength;
-
-    if (m_constraint) {
-        auto *pulley = static_cast<JPH::PulleyConstraint *>(m_constraint);
-        const float maxL = m_maxLength < 0.0f ? pulley->GetMaxLength() : m_maxLength;
-        if (m_minLength >= 0.0f && m_minLength <= maxL)
-            pulley->SetLength(m_minLength, maxL);
-    }
-
     emit minLengthChanged(m_minLength);
+    emit changed();
 }
 
-float PulleyConstraint::maxLength() const
+float PulleyConstraintSettings::maxLength() const
 {
     return m_maxLength;
 }
 
-void PulleyConstraint::setMaxLength(float maxLength)
+void PulleyConstraintSettings::setMaxLength(float maxLength)
 {
     if (qFuzzyCompare(m_maxLength, maxLength))
         return;
 
     m_maxLength = maxLength;
+    emit maxLengthChanged(m_maxLength);
+    emit changed();
+}
 
-    if (m_constraint) {
-        auto *pulley = static_cast<JPH::PulleyConstraint *>(m_constraint);
-        const float minL = m_minLength < 0.0f ? pulley->GetMinLength() : m_minLength;
-        const float maxL = m_maxLength < 0.0f ? pulley->GetMaxLength() : m_maxLength;
-        if (minL >= 0.0f && minL <= maxL)
-            pulley->SetLength(minL, maxL);
+JPH::Ref<JPH::TwoBodyConstraintSettings> PulleyConstraintSettings::createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame) const
+{
+    auto *settings = new JPH::PulleyConstraintSettings;
+    applyBaseSettings(*settings);
+    settings->mSpace = static_cast<JPH::EConstraintSpace>(m_space);
+    settings->mBodyPoint1 = PhysicsUtils::toJoltType(m_bodyPoint1);
+    settings->mFixedPoint1 = PhysicsUtils::toJoltType(m_fixedPoint1);
+    settings->mBodyPoint2 = PhysicsUtils::toJoltType(m_bodyPoint2);
+    settings->mFixedPoint2 = PhysicsUtils::toJoltType(m_fixedPoint2);
+    settings->mRatio = m_ratio;
+    settings->mMinLength = m_minLength;
+    settings->mMaxLength = m_maxLength;
+    mapToWorld(settings, localFrame);
+    return settings;
+}
+
+void PulleyConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                          const QQuick3DNode *localFrame) const
+{
+    if (settings == nullptr || !canMapToWorld(localFrame))
+        return;
+
+    auto *pulley = JPH::DynamicCast<JPH::PulleyConstraintSettings>(settings);
+    if (pulley == nullptr)
+        return;
+
+    mapPositionToWorld(pulley->mBodyPoint1, localFrame);
+    mapPositionToWorld(pulley->mFixedPoint1, localFrame);
+    mapPositionToWorld(pulley->mBodyPoint2, localFrame);
+    mapPositionToWorld(pulley->mFixedPoint2, localFrame);
+}
+
+PulleyConstraint::PulleyConstraint(QQuick3DNode *parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
+{
+    setSettings(new PulleyConstraintSettings(this));
+}
+
+PulleyConstraint::~PulleyConstraint() = default;
+
+PulleyConstraintSettings *PulleyConstraint::settings() const
+{
+    return m_settings;
+}
+
+void PulleyConstraint::setSettings(PulleyConstraintSettings *settings)
+{
+    if (m_settings == settings)
+        return;
+
+    if (m_settings != nullptr)
+        m_settings->disconnect(this);
+
+    m_settings = settings;
+
+    if (m_settings != nullptr) {
+        QObject::connect(m_settings, &AbstractPhysicsConstraintSettings::changed, this,
+                         [this] { updateJoltObject(); });
+        QObject::connect(m_settings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_settings == obj)
+                setSettings(nullptr);
+        });
     }
 
-    emit maxLengthChanged(m_maxLength);
+    updateJoltObject();
+    emit settingsChanged(m_settings);
 }
 
 float PulleyConstraint::getCurrentLength() const
@@ -172,21 +199,14 @@ float PulleyConstraint::getTotalLambdaPosition() const
 
 void PulleyConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || !joltBodiesReady())
+    if (m_jolt == nullptr || !joltBodiesReady() || m_settings == nullptr)
         return;
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
-    m_constraintSettings.mBodyPoint1 = PhysicsUtils::toJoltType(m_bodyPoint1);
-    m_constraintSettings.mFixedPoint1 = PhysicsUtils::toJoltType(m_fixedPoint1);
-    m_constraintSettings.mBodyPoint2 = PhysicsUtils::toJoltType(m_bodyPoint2);
-    m_constraintSettings.mFixedPoint2 = PhysicsUtils::toJoltType(m_fixedPoint2);
-    m_constraintSettings.mRatio = m_ratio;
-    m_constraintSettings.mMinLength = m_minLength;
-    m_constraintSettings.mMaxLength = m_maxLength < 0.0f ? -1.0f : m_maxLength;
-
-    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
+    const JPH::Ref<JPH::TwoBodyConstraintSettings> settings =
+            m_settings->createJoltTwoBodyConstraintSettings();
+    m_constraint = settings->Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

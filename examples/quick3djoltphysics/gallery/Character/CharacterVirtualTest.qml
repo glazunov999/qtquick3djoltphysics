@@ -304,7 +304,6 @@ Item {
             supportingVolume: Qt.vector4d(0, 1, 0, -characterRadiusStanding)
             mass: 10
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: !characterController.crouchActive ? characterHeightStanding : characterHeightCrouching
                     diameter: characterRadiusStanding * 2
@@ -615,7 +614,6 @@ Item {
             mass: 10
             position: Qt.vector3d(-5, 0, 3)
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: characterHeightStanding
                     diameter: characterRadiusStanding * 2

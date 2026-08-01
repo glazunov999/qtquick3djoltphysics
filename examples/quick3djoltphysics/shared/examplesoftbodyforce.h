@@ -10,7 +10,7 @@ class ExampleSoftBodyForce : public QObject
 public:
     explicit ExampleSoftBodyForce(QObject *parent = nullptr);
 
-    Q_INVOKABLE QVector3D fluctuatingForce(float time, float maxForce = 15.0f, float maxAngleDegrees = 90.0f) const;
+    Q_INVOKABLE QVector3D fluctuatingForce(float time, float maxForce = 10000.0f, float maxAngleDegrees = 90.0f) const;
 };
 
 #endif // EXAMPLESOFTBODYFORCE_H

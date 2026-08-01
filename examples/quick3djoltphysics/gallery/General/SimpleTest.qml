@@ -28,6 +28,7 @@ Item {
         objectLayerPairFilter: ExampleObjectLayerPairFilter {}
         broadPhaseLayer: ExampleBroadPhaseLayer {}
         objectVsBroadPhaseLayerFilter: ExampleObjectVsBroadPhaseLayerFilter {}
+        forceDebugDraw: true
         settings: PhysicsSettings {
             numVelocitySteps: Math.round(AppSettings.numVelocitySteps)
             numPositionSteps: Math.round(AppSettings.numPositionSteps)

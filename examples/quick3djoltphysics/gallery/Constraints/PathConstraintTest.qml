@@ -200,9 +200,11 @@ Item {
         PathConstraint {
             body1: spiralBase
             body2: spiralRider
-            path: spiralPath
-            pathPosition: Qt.vector3d(0, 15, 0)
-            rotationConstraintType: PathConstraint.Free
+            settings: PathConstraintSettings {
+                path: spiralPath
+                pathPosition: Qt.vector3d(0, 15, 0)
+                rotationConstraintType: PathConstraintSettings.Free
+            }
         }
 
         // Circular looping path (right, Jolt variation 1)
@@ -259,10 +261,12 @@ Item {
         PathConstraint {
             body1: circleBase
             body2: circleRider
-            path: circlePath
-            pathPosition: Qt.vector3d(0, 5, 0)
-            pathRotation: circlePathRotation
-            rotationConstraintType: PathConstraint.Free
+            settings: PathConstraintSettings {
+                path: circlePath
+                pathPosition: Qt.vector3d(0, 5, 0)
+                pathRotation: circlePathRotation
+                rotationConstraintType: PathConstraintSettings.Free
+            }
         }
     }
 

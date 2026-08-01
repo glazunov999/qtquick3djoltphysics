@@ -1,4 +1,5 @@
 #include "capsulegeometry_p.h"
+#include "capsulegeometryutils_p.h"
 
 #include <QVector3D>
 
@@ -495,6 +496,11 @@ void CapsuleGeometry::updateData()
         }
     }
 
+    for (QVector3D &vertex : vertices)
+        vertex = CapsuleGeometryUtils::rotatedZ90(vertex);
+    for (QVector3D &normal : vertexNormals)
+        normal = CapsuleGeometryUtils::rotatedZ90(normal);
+
     uint32_t stride = 3 * sizeof(float);
     uint32_t strideNormal = 0;
     uint32_t strideUV = 0;
@@ -574,6 +580,8 @@ void CapsuleGeometry::updateData()
     setVertexData(vertexData);
     setIndexData(indexData);
 
-    setBounds(QVector3D(-radius - 0.5f * m_height, -radius, -radius),
-              QVector3D(radius + 0.5f * m_height, radius, radius));
+    setBounds(QVector3D(-verifRad, -halfDepth - verifRad, -verifRad),
+              QVector3D(verifRad, halfDepth + verifRad, verifRad));
 }
+
+QT_END_NAMESPACE

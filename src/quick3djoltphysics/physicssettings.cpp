@@ -126,18 +126,18 @@ void PhysicsSettings::setLinearCastMaxPenetration(float linearCastMaxPenetration
     emit changed();
 }
 
-float PhysicsSettings::manifoldToleranceSq() const
+float PhysicsSettings::manifoldTolerance() const
 {
-    return m_physicsSettings.mManifoldToleranceSq;
+    return m_physicsSettings.mManifoldTolerance;
 }
 
-void PhysicsSettings::setManifoldToleranceSq(float manifoldToleranceSq)
+void PhysicsSettings::setManifoldTolerance(float manifoldTolerance)
 {
-    if (qFuzzyCompare(m_physicsSettings.mManifoldToleranceSq, manifoldToleranceSq))
+    if (qFuzzyCompare(m_physicsSettings.mManifoldTolerance, manifoldTolerance))
         return;
 
-    m_physicsSettings.mManifoldToleranceSq = manifoldToleranceSq;
-    emit manifoldToleranceSqChanged(manifoldToleranceSq);
+    m_physicsSettings.mManifoldTolerance = manifoldTolerance;
+    emit manifoldToleranceChanged(manifoldTolerance);
     emit changed();
 }
 

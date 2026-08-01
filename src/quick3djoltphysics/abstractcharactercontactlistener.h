@@ -33,7 +33,7 @@ public:
     {
         quint32 bodyID2;
         QVector3D contactPosition;
-        QVector3D contactNormal;
+        QVector3D contactNormal; ///< Points towards the character, same as JPH::CharacterContact::mContactNormal
     };
 
     virtual void onAdjustBodyVelocity(int bodyID2, QVector3D &linearVelocity, QVector3D &angularVelocity) = 0;

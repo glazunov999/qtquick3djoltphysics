@@ -206,9 +206,11 @@ Item {
         Component {
             id: chainSliderComponent
             SliderConstraint {
-                autoDetectPoint: true
-                limitsMin: -5
-                limitsMax: 10
+                settings: SliderConstraintSettings {
+                    autoDetectPoint: true
+                    limitsMin: -5
+                    limitsMax: 10
+                }
             }
         }
 
@@ -224,14 +226,14 @@ Item {
                     segmentIndex: i,
                     linkPosition: position
                 })
-                chainSliderComponent.createObject(viewport.scene, {
+                const constraint = chainSliderComponent.createObject(viewport.scene, {
                     body1: prev,
-                    body2: link,
-                    sliderAxis1: sliderAxis,
-                    sliderAxis2: sliderAxis,
-                    normalAxis1: normalAxis,
-                    normalAxis2: normalAxis
+                    body2: link
                 })
+                constraint.settings.sliderAxis1 = sliderAxis
+                constraint.settings.sliderAxis2 = sliderAxis
+                constraint.settings.normalAxis1 = normalAxis
+                constraint.settings.normalAxis2 = normalAxis
                 prev = link
             }
         }
@@ -324,26 +326,30 @@ Item {
         SliderConstraint {
             body1: light1
             body2: heavy
-            autoDetectPoint: true
-            sliderAxis1: Qt.vector3d(0, 0, 1)
-            sliderAxis2: Qt.vector3d(0, 0, 1)
-            normalAxis1: Qt.vector3d(0, 1, 0)
-            normalAxis2: Qt.vector3d(0, 1, 0)
-            limitsMin: 0
-            limitsMax: 1
+            settings: SliderConstraintSettings {
+                autoDetectPoint: true
+                sliderAxis1: Qt.vector3d(0, 0, 1)
+                sliderAxis2: Qt.vector3d(0, 0, 1)
+                normalAxis1: Qt.vector3d(0, 1, 0)
+                normalAxis2: Qt.vector3d(0, 1, 0)
+                limitsMin: 0
+                limitsMax: 1
+            }
         }
 
         // heavy as body1 — works as intended
         SliderConstraint {
             body1: heavy
             body2: light2
-            autoDetectPoint: true
-            sliderAxis1: Qt.vector3d(0, 0, 1)
-            sliderAxis2: Qt.vector3d(0, 0, 1)
-            normalAxis1: Qt.vector3d(0, 1, 0)
-            normalAxis2: Qt.vector3d(0, 1, 0)
-            limitsMin: 0
-            limitsMax: 1
+            settings: SliderConstraintSettings {
+                autoDetectPoint: true
+                sliderAxis1: Qt.vector3d(0, 0, 1)
+                sliderAxis2: Qt.vector3d(0, 0, 1)
+                normalAxis1: Qt.vector3d(0, 1, 0)
+                normalAxis2: Qt.vector3d(0, 1, 0)
+                limitsMin: 0
+                limitsMax: 1
+            }
         }
 
         GroupFilterTable {
@@ -400,13 +406,15 @@ Item {
         SliderConstraint {
             body1: vert1
             body2: vert2
-            autoDetectPoint: true
-            sliderAxis1: Qt.vector3d(0, 1, 0)
-            sliderAxis2: Qt.vector3d(0, 1, 0)
-            normalAxis1: Qt.vector3d(1, 0, 0)
-            normalAxis2: Qt.vector3d(1, 0, 0)
-            limitsMin: 0
-            limitsMax: 2
+            settings: SliderConstraintSettings {
+                autoDetectPoint: true
+                sliderAxis1: Qt.vector3d(0, 1, 0)
+                sliderAxis2: Qt.vector3d(0, 1, 0)
+                normalAxis1: Qt.vector3d(1, 0, 0)
+                normalAxis2: Qt.vector3d(1, 0, 0)
+                limitsMin: 0
+                limitsMax: 2
+            }
         }
 
         // Two bodies vertically stacked with a slider constraint using soft limits (Jolt x = 10)
@@ -457,16 +465,18 @@ Item {
         SliderConstraint {
             body1: softVert1
             body2: softVert2
-            autoDetectPoint: true
-            sliderAxis1: Qt.vector3d(0, 1, 0)
-            sliderAxis2: Qt.vector3d(0, 1, 0)
-            normalAxis1: Qt.vector3d(1, 0, 0)
-            normalAxis2: Qt.vector3d(1, 0, 0)
-            limitsMin: 0
-            limitsMax: 2
-            limitsSpringSettings: SpringSettings {
-                frequency: 1
-                damping: 0.5
+            settings: SliderConstraintSettings {
+                autoDetectPoint: true
+                sliderAxis1: Qt.vector3d(0, 1, 0)
+                sliderAxis2: Qt.vector3d(0, 1, 0)
+                normalAxis1: Qt.vector3d(1, 0, 0)
+                normalAxis2: Qt.vector3d(1, 0, 0)
+                limitsMin: 0
+                limitsMax: 2
+                limitsSpringSettings: SpringSettings {
+                    frequency: 1
+                    damping: 0.5
+                }
             }
         }
 

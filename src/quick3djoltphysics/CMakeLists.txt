@@ -17,6 +17,7 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         abstracttwobodyphysicsconstraint_p.h abstracttwobodyphysicsconstraint.cpp
         abstractphysicsnode_p.h abstractphysicsnode.cpp
         abstractshape_p.h abstractshape.cpp
+        abstractcompoundshape_p.h abstractcompoundshape.cpp
         abstractsoftbodycontactlistener.h abstractsoftbodycontactlistener.cpp
         body_p.h body.cpp
         boxshape_p.h boxshape.cpp
@@ -24,12 +25,14 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         character_p.h character.cpp
         abstractcharactercontactlistener.h abstractcharactercontactlistener.cpp
         charactervirtual_p.h charactervirtual.cpp
+        collidepointresult_p.h collidepointresult.cpp
         collideshaperesult_p.h collideshaperesult.cpp
         collisiongroup_p.h collisiongroup.cpp
         coneconstraint_p.h coneconstraint.cpp
         abstractcontactlistener.h abstractcontactlistener.cpp
         convexhullshape_p.h convexhullshape.cpp
         cylindershape_p.h cylindershape.cpp
+        debuggeometry_p.h debuggeometry.cpp
         distanceconstraint_p.h distanceconstraint.cpp
         emptyshape_p.h emptyshape.cpp
         fixedconstraint_p.h fixedconstraint.cpp
@@ -50,6 +53,11 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         planeshape_p.h planeshape.cpp
         pointconstraint_p.h pointconstraint.cpp
         pulleyconstraint_p.h pulleyconstraint.cpp
+        ragdoll_p.h ragdoll.cpp
+        ragdollpart_p.h ragdollpart.cpp
+        skeletonpose_p.h skeletonpose.cpp
+        skeletonmapper_p.h skeletonmapper.cpp
+        quick3dskeletonutils_p.h quick3dskeletonutils.cpp
         rackandpinionconstraint_p.h rackandpinionconstraint.cpp
         sliderconstraint_p.h sliderconstraint.cpp
         softbody_p.h softbody.cpp
@@ -63,11 +71,18 @@ qt_internal_add_qml_module(Quick3DJoltPhysics
         sphereshape_p.h sphereshape.cpp
         springsettings_p.h springsettings.cpp
         staticcompoundshape_p.h staticcompoundshape.cpp
+        mutablecompoundshape_p.h mutablecompoundshape.cpp
         swingtwistconstraint_p.h swingtwistconstraint.cpp
+        taperedcapsuleshape_p.h taperedcapsuleshape.cpp
+        taperedcylindershape_p.h taperedcylindershape.cpp
         triangleresult_p.h triangleresult.cpp
     DEFINES
+        JPH_DEBUG_RENDERER
+        JPH_OBJECT_STREAM
     SYSTEM_INCLUDE_DIRECTORIES
         ../3rdparty/JoltPhysics/
+    DEPENDENCIES
+        QtQuick3D
     LIBRARIES
         Qt::CorePrivate
         Qt::GuiPrivate
@@ -95,3 +110,7 @@ qt_internal_extend_target(qquick3djoltphysicsplugin
     LIBRARIES
         Qt::Quick3DJoltPhysicsPrivate
 )
+
+if(QT_FEATURE_quick_designer AND QT_BUILD_SHARED_LIBS)
+    add_subdirectory(designer)
+endif()

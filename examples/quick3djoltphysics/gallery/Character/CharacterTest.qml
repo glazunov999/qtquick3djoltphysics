@@ -234,7 +234,6 @@ Item {
             maxSlopeAngle: 45
             supportingVolume: Qt.vector4d(0, 1, 0, -characterRadiusStanding)
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: !characterController.crouchActive ? characterHeightStanding : characterHeightCrouching
                     diameter: characterRadiusStanding * 2

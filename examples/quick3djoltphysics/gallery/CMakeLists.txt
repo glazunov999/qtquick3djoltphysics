@@ -114,11 +114,23 @@ qt_add_qml_module(${PROJECT_NAME}
     QML_FILES SampleCameraController.qml
     QML_FILES ScaledShapes/ScaledBoxShapeTest.qml
     QML_FILES ScaledShapes/ScaledCapsuleShapeTest.qml
+    QML_FILES ScaledShapes/ScaledConvexHullShapeTest.qml
     QML_FILES ScaledShapes/ScaledCylinderShapeTest.qml
+    QML_FILES ScaledShapes/ScaledHeightFieldShapeTest.qml
+    QML_FILES ScaledShapes/ScaledMeshShapeTest.qml
+    QML_FILES ScaledShapes/ScaledMutableCompoundShapeTest.qml
+    QML_FILES ScaledShapes/ScaledOffsetCenterOfMassShapeTest.qml
+    QML_FILES ScaledShapes/ScaledPlaneShapeTest.qml
     QML_FILES ScaledShapes/ScaledSphereShapeTest.qml
+    QML_FILES ScaledShapes/ScaledStaticCompoundShapeTest.qml
+    QML_FILES ScaledShapes/ScaledTaperedCapsuleShapeTest.qml
+    QML_FILES ScaledShapes/ScaledTaperedCylinderShapeTest.qml
+    QML_FILES ScaledShapes/DynamicScaledShapeTest.qml
     QML_FILES SettingsView.qml
     QML_FILES Shapes/BoxShapeTest.qml
     QML_FILES Shapes/CapsuleShapeTest.qml
+    QML_FILES Shapes/TaperedCapsuleShapeTest.qml
+    QML_FILES Shapes/TaperedCylinderShapeTest.qml
     QML_FILES Shapes/ConvexHullShapeTest.qml
     QML_FILES Shapes/CylinderShapeTest.qml
     QML_FILES Shapes/HeightFieldShapeTest.qml
@@ -126,6 +138,7 @@ qt_add_qml_module(${PROJECT_NAME}
     QML_FILES Shapes/OffsetCenterOfMassShapeTest.qml
     QML_FILES Shapes/SphereShapeTest.qml
     QML_FILES Shapes/StaticCompoundShapeTest.qml
+    QML_FILES Shapes/MutableCompoundShapeTest.qml
     QML_FILES Shapes/PlaneShapeTest.qml
     QML_FILES StartupView.qml
     QML_FILES Character/CharacterTest.qml
@@ -141,6 +154,10 @@ qt_add_qml_module(${PROJECT_NAME}
     QML_FILES SoftBody/SoftBodyRestitutionTest.qml
     QML_FILES SoftBody/SoftBodyContactListenerTest.qml
     QML_FILES SoftBody/SoftBodyPressureTest.qml
+    QML_FILES Rig/CreateRigTest.qml
+    QML_FILES Rig/SkeletonMapperTest.qml
+    QML_FILES Rig/Assets/SimpleHumanRagdoll.qml
+    QML_FILES Rig/Assets/RiggedFigure.qml
 )
 
 install(TARGETS ${PROJECT_NAME}

@@ -566,18 +566,19 @@ void CharacterVirtual::emitContactCallbacks()
         return;
 
     for (const auto &contact : std::as_const(m_characterContactListener->m_contacts)) {
-        Body *qtBody = nullptr;
+        AbstractPhysicsBody *qtBody = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(contact.bodyID2));
             if (bodyLock.Succeeded()) {
                 const JPH::Body &body = bodyLock.GetBody();
-                qtBody = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody = qobject_cast<AbstractPhysicsBody *>(
+                    reinterpret_cast<AbstractPhysicsNode *>(body.GetUserData()));
             }
         }
 
         if (qtBody) {
-            emit qtBody->characterContact(this, contact.contactPosition, contact.contactNormal);
-            emit characterContact(qtBody, contact.contactPosition, -contact.contactNormal);
+            emit qtBody->characterContact(this, contact.contactPosition, -contact.contactNormal);
+            emit characterContact(qtBody, contact.contactPosition, contact.contactNormal);
         }
     }
 

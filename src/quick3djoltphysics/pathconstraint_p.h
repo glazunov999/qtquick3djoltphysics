@@ -15,7 +15,7 @@
 #include <QVector3D>
 #include <QQuaternion>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(PathConstraintPathBase *path READ path WRITE setPath NOTIFY pathChanged)
@@ -25,14 +25,8 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraint : public AbstractTwoBodyPhysics
     Q_PROPERTY(float maxFrictionForce READ maxFrictionForce WRITE setMaxFrictionForce NOTIFY maxFrictionForceChanged)
     Q_PROPERTY(MotorSettings *positionMotorSettings READ positionMotorSettings WRITE setPositionMotorSettings NOTIFY positionMotorSettingsChanged)
     Q_PROPERTY(RotationConstraintType rotationConstraintType READ rotationConstraintType WRITE setRotationConstraintType NOTIFY rotationConstraintTypeChanged)
-    Q_PROPERTY(MotorState positionMotorState READ positionMotorState WRITE setPositionMotorState NOTIFY positionMotorStateChanged)
-    Q_PROPERTY(float targetVelocity READ targetVelocity WRITE setTargetVelocity NOTIFY targetVelocityChanged)
-    Q_PROPERTY(float targetPathFraction READ targetPathFraction WRITE setTargetPathFraction NOTIFY targetPathFractionChanged)
-    QML_NAMED_ELEMENT(PathConstraint)
+    QML_NAMED_ELEMENT(PathConstraintSettings)
 public:
-    explicit PathConstraint(QQuick3DNode *parent = nullptr);
-    ~PathConstraint() override;
-
     enum class RotationConstraintType {
         Free,
         ConstrainAroundTangent,
@@ -43,12 +37,7 @@ public:
     };
     Q_ENUM(RotationConstraintType)
 
-    enum class MotorState {
-        Off,
-        Velocity,
-        Position,
-    };
-    Q_ENUM(MotorState)
+    explicit PathConstraintSettings(QObject *parent = nullptr);
 
     PathConstraintPathBase *path() const;
     void setPath(PathConstraintPathBase *path);
@@ -66,10 +55,55 @@ public:
     void setMaxFrictionForce(float maxFrictionForce);
 
     MotorSettings *positionMotorSettings() const;
-    void setPositionMotorSettings(MotorSettings *settings);
+    void setPositionMotorSettings(MotorSettings *positionMotorSettings);
 
     RotationConstraintType rotationConstraintType() const;
-    void setRotationConstraintType(RotationConstraintType type);
+    void setRotationConstraintType(RotationConstraintType rotationConstraintType);
+
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
+signals:
+    void pathChanged(PathConstraintPathBase *path);
+    void pathPositionChanged(const QVector3D &pathPosition);
+    void pathRotationChanged(const QQuaternion &pathRotation);
+    void pathFractionChanged(float pathFraction);
+    void maxFrictionForceChanged(float maxFrictionForce);
+    void positionMotorSettingsChanged(MotorSettings *positionMotorSettings);
+    void rotationConstraintTypeChanged(RotationConstraintType rotationConstraintType);
+
+private:
+    PathConstraintPathBase *m_path = nullptr;
+    QVector3D m_pathPosition;
+    QQuaternion m_pathRotation;
+    float m_pathFraction = 0.0f;
+    float m_maxFrictionForce = 0.0f;
+    MotorSettings *m_positionMotorSettings = nullptr;
+    RotationConstraintType m_rotationConstraintType = RotationConstraintType::Free;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT PathConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(PathConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    Q_PROPERTY(MotorState positionMotorState READ positionMotorState WRITE setPositionMotorState NOTIFY positionMotorStateChanged)
+    Q_PROPERTY(float targetVelocity READ targetVelocity WRITE setTargetVelocity NOTIFY targetVelocityChanged)
+    Q_PROPERTY(float targetPathFraction READ targetPathFraction WRITE setTargetPathFraction NOTIFY targetPathFractionChanged)
+    QML_NAMED_ELEMENT(PathConstraint)
+public:
+    explicit PathConstraint(QQuick3DNode *parent = nullptr);
+    ~PathConstraint() override;
+
+    enum class MotorState {
+        Off,
+        Velocity,
+        Position,
+    };
+    Q_ENUM(MotorState)
+
+    PathConstraintSettings *settings() const;
+    void setSettings(PathConstraintSettings *settings);
 
     MotorState positionMotorState() const;
     void setPositionMotorState(MotorState state);
@@ -85,13 +119,7 @@ public:
     Q_INVOKABLE float getTotalLambdaPositionLimits() const;
 
 signals:
-    void pathChanged(PathConstraintPathBase *path);
-    void pathPositionChanged(const QVector3D &pathPosition);
-    void pathRotationChanged(const QQuaternion &pathRotation);
-    void pathFractionChanged(float pathFraction);
-    void maxFrictionForceChanged(float maxFrictionForce);
-    void positionMotorSettingsChanged(MotorSettings *settings);
-    void rotationConstraintTypeChanged(RotationConstraintType type);
+    void settingsChanged(PathConstraintSettings *settings);
     void positionMotorStateChanged(MotorState state);
     void targetVelocityChanged(float velocity);
     void targetPathFractionChanged(float fraction);
@@ -100,22 +128,12 @@ protected:
     void updateJoltObject() override;
 
 private:
-    void applyRuntimeMotorSettings();
-    void applyRuntimePath();
+    void applyRuntimeMotorState();
 
-    PathConstraintPathBase *m_path = nullptr;
-    QVector3D m_pathPosition;
-    QQuaternion m_pathRotation;
-    float m_pathFraction = 0.0f;
-    float m_maxFrictionForce = 0.0f;
-    MotorSettings *m_positionMotorSettings = nullptr;
-    QMetaObject::Connection m_pathSignalConnection;
-    QMetaObject::Connection m_motorSettingsConnection;
-    RotationConstraintType m_rotationConstraintType = RotationConstraintType::Free;
+    PathConstraintSettings *m_settings = nullptr;
     MotorState m_positionMotorState = MotorState::Off;
     float m_targetVelocity = 0.0f;
     float m_targetPathFraction = 0.0f;
-    JPH::PathConstraintSettings m_constraintSettings;
 };
 
 #endif // PATHCONSTRAINT_P_H

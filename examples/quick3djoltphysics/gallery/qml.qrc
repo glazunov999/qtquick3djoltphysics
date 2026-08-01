@@ -40,17 +40,34 @@
         <file>General/StackTest.qml</file>
         <file>General/TwoDFunnelTest.qml</file>
         <file>General/WallTest.qml</file>
+        <file>Rig/CreateRigTest.qml</file>
+        <file>Rig/SkeletonMapperTest.qml</file>
+        <file>Rig/Assets/SimpleHumanRagdoll.qml</file>
+        <file>Rig/Assets/RiggedFigure.qml</file>
         <file>ScaledShapes/ScaledBoxShapeTest.qml</file>
         <file>ScaledShapes/ScaledCapsuleShapeTest.qml</file>
+        <file>ScaledShapes/ScaledConvexHullShapeTest.qml</file>
         <file>ScaledShapes/ScaledCylinderShapeTest.qml</file>
+        <file>ScaledShapes/ScaledHeightFieldShapeTest.qml</file>
+        <file>ScaledShapes/ScaledMeshShapeTest.qml</file>
+        <file>ScaledShapes/ScaledMutableCompoundShapeTest.qml</file>
+        <file>ScaledShapes/ScaledOffsetCenterOfMassShapeTest.qml</file>
+        <file>ScaledShapes/ScaledPlaneShapeTest.qml</file>
         <file>ScaledShapes/ScaledSphereShapeTest.qml</file>
+        <file>ScaledShapes/ScaledStaticCompoundShapeTest.qml</file>
+        <file>ScaledShapes/ScaledTaperedCapsuleShapeTest.qml</file>
+        <file>ScaledShapes/ScaledTaperedCylinderShapeTest.qml</file>
+        <file>ScaledShapes/DynamicScaledShapeTest.qml</file>
         <file>Shapes/StaticCompoundShapeTest.qml</file>
+        <file>Shapes/MutableCompoundShapeTest.qml</file>
         <file>Shapes/SphereShapeTest.qml</file>
         <file>Shapes/OffsetCenterOfMassShapeTest.qml</file>
         <file>Shapes/MeshShapeTest.qml</file>
         <file>Shapes/CylinderShapeTest.qml</file>
         <file>Shapes/ConvexHullShapeTest.qml</file>
         <file>Shapes/CapsuleShapeTest.qml</file>
+        <file>Shapes/TaperedCapsuleShapeTest.qml</file>
+        <file>Shapes/TaperedCylinderShapeTest.qml</file>
         <file>Shapes/BoxShapeTest.qml</file>
         <file>Shapes/PlaneShapeTest.qml</file>
         <file>Shapes/HeightFieldShapeTest.qml</file>

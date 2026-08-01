@@ -5,26 +5,30 @@
 
 #include <QVector3D>
 
-#include "body_p.h"
+#include "abstractphysicsbody_p.h"
+#include "softbody_p.h"
 
 class Q_QUICK3DJOLTPHYSICS_EXPORT RayCastResult
 {
     Q_GADGET
-    Q_PROPERTY(Body *body READ body CONSTANT)
+    Q_PROPERTY(AbstractPhysicsBody *body READ body CONSTANT)
+    Q_PROPERTY(SoftBody *softBody READ softBody CONSTANT)
     Q_PROPERTY(QVector3D position READ position CONSTANT)
     Q_PROPERTY(QVector3D normal READ normal CONSTANT)
     Q_PROPERTY(float fraction READ fraction CONSTANT)
 public:
     RayCastResult();
-    RayCastResult(Body *body, const QVector3D &position, const QVector3D &normal, float fraction);
+    RayCastResult(AbstractPhysicsBody *body, SoftBody *softBody, const QVector3D &position, const QVector3D &normal, float fraction);
 
-    Body *body() const;
+    AbstractPhysicsBody *body() const;
+    SoftBody *softBody() const;
     QVector3D position() const;
     QVector3D normal() const;
     float fraction() const;
 
 private:
-    Body *m_body = nullptr;
+    AbstractPhysicsBody *m_body = nullptr;
+    SoftBody *m_softBody = nullptr;
     QVector3D m_position;
     QVector3D m_normal;
     float m_fraction = 1.0f;

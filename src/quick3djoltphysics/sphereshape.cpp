@@ -31,5 +31,5 @@ void SphereShape::setDiameter(float diameter)
 void SphereShape::createJoltShape()
 {
     m_joltShape = new JPH::SphereShape(m_diameter * 0.5f);
-    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(sceneScale()));
+    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(physicsScale()));
 }

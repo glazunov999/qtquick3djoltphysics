@@ -264,31 +264,31 @@ Item {
                 if ((i & 1) == 0) {
                     let point = position.plus(Qt.vector3d(-0.5 * 4, 0, 0.5 * 4));
                     constraint = constraintComponent.createObject(viewport.scene, {
-                            point1: point,
-                            point2: point,
                             body1: prev,
                             body2: body,
-                            hingeAxis1: Qt.vector3d(0, 1, 0),
-                            hingeAxis2: Qt.vector3d(0, 1, 0),
-                            normalAxis1: Qt.vector3d(1, 0, 0),
-                            normalAxis2: Qt.vector3d(1, 0, 0),
-                            limitsMin: -10.0,
-                            limitsMax: 20.0
                     });
+                    constraint.settings.point1 = point;
+                    constraint.settings.point2 = point;
+                    constraint.settings.hingeAxis1 = Qt.vector3d(0, 1, 0);
+                    constraint.settings.hingeAxis2 = Qt.vector3d(0, 1, 0);
+                    constraint.settings.normalAxis1 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.normalAxis2 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.limitsMin = -10.0;
+                    constraint.settings.limitsMax = 20.0;
                 } else {
                     let point = position.plus(Qt.vector3d(-0.5 * 4, 0, -0.5 * 4));
                     constraint = constraintComponent.createObject(viewport.scene, {
-                            point1: point,
-                            point2: point,
                             body1: prev,
                             body2: body,
-                            hingeAxis1: Qt.vector3d(0, 0, 1),
-                            hingeAxis2: Qt.vector3d(0, 0, 1),
-                            normalAxis1: Qt.vector3d(1, 0, 0),
-                            normalAxis2: Qt.vector3d(1, 0, 0),
-                            limitsMin: -10.0,
-                            limitsMax: 20.0
                     });
+                    constraint.settings.point1 = point;
+                    constraint.settings.point2 = point;
+                    constraint.settings.hingeAxis1 = Qt.vector3d(0, 0, 1);
+                    constraint.settings.hingeAxis2 = Qt.vector3d(0, 0, 1);
+                    constraint.settings.normalAxis1 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.normalAxis2 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.limitsMin = -10.0;
+                    constraint.settings.limitsMax = 20.0;
                 }
 
                 prev = body;

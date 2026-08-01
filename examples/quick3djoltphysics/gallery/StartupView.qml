@@ -14,8 +14,16 @@ Item {
 
     readonly property real listItemWidth: 180
     readonly property real listItemHeight: 40
+    readonly property real listColumnSpacing: 20
 
     anchors.fill: parent
+
+    function maxListModelCount(models) {
+        let max = 0
+        for (let i = 0; i < models.length; ++i)
+            max = Math.max(max, models[i].count)
+        return max
+    }
 
     ListModel {
         id: generalModel
@@ -108,6 +116,14 @@ Item {
             file: "Shapes/CapsuleShapeTest.qml"
         }
         ListElement {
+            name: "Tapered Capsule Shape"
+            file: "Shapes/TaperedCapsuleShapeTest.qml"
+        }
+        ListElement {
+            name: "Tapered Cylinder Shape"
+            file: "Shapes/TaperedCylinderShapeTest.qml"
+        }
+        ListElement {
             name: "Cylinder Shape"
             file: "Shapes/CylinderShapeTest.qml"
         }
@@ -126,6 +142,10 @@ Item {
         ListElement {
             name: "Static Compound Shape"
             file: "Shapes/StaticCompoundShapeTest.qml"
+        }
+        ListElement {
+            name: "Mutable Compound Shape"
+            file: "Shapes/MutableCompoundShapeTest.qml"
         }
         ListElement {
             name: "Offset Center Of Mass Shape"
@@ -154,6 +174,46 @@ Item {
         ListElement {
             name: "Scaled Cylinder Shape"
             file: "ScaledShapes/ScaledCylinderShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Tapered Capsule Shape"
+            file: "ScaledShapes/ScaledTaperedCapsuleShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Tapered Cylinder Shape"
+            file: "ScaledShapes/ScaledTaperedCylinderShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Convex Hull Shape"
+            file: "ScaledShapes/ScaledConvexHullShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Static Compound Shape"
+            file: "ScaledShapes/ScaledStaticCompoundShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Mutable Compound Shape"
+            file: "ScaledShapes/ScaledMutableCompoundShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Offset Center Of Mass Shape"
+            file: "ScaledShapes/ScaledOffsetCenterOfMassShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled HeightField Shape"
+            file: "ScaledShapes/ScaledHeightFieldShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Mesh Shape"
+            file: "ScaledShapes/ScaledMeshShapeTest.qml"
+        }
+        ListElement {
+            name: "Scaled Plane Shape"
+            file: "ScaledShapes/ScaledPlaneShapeTest.qml"
+        }
+        ListElement {
+            name: "Dynamic Scaled Shape"
+            file: "ScaledShapes/DynamicScaledShapeTest.qml"
         }
     }
 
@@ -218,6 +278,18 @@ Item {
     }
 
     ListModel {
+        id: rigModel
+        ListElement {
+            name: "Create Rig"
+            file: "Rig/CreateRigTest.qml"
+        }
+        ListElement {
+            name: "Skeleton Mapper"
+            file: "Rig/SkeletonMapperTest.qml"
+        }
+    }
+
+    ListModel {
         id: softBodyModel
         ListElement {
             name: "Gravity Factor"
@@ -244,6 +316,20 @@ Item {
             file: "SoftBody/SoftBodyPressureTest.qml"
         }
     }
+
+    readonly property var listModels: [
+        generalModel,
+        shapesModel,
+        scaledShapesModel,
+        constraintsModel,
+        characterModel,
+        rigModel,
+        softBodyModel
+    ]
+    readonly property int maxListItemCount: maxListModelCount(listModels)
+    readonly property real listsWidth: listModels.length * listItemWidth
+                                     + (listModels.length - 1) * listColumnSpacing
+    readonly property real listsHeight: maxListItemCount * listItemHeight
 
     Component {
         id: listComponent
@@ -284,51 +370,42 @@ Item {
         font.pointSize: AppSettings.fontSizeLarge
     }
 
-    Row {
-        anchors.horizontalCenter: parent.horizontalCenter
+    Flickable {
+        id: listsFlickable
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.top: topLabel.bottom
         anchors.topMargin: 20
-        spacing: 20
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: generalModel
-            delegate: listComponent
+        anchors.bottom: parent.bottom
+        contentWidth: Math.max(width, listsWidth)
+        contentHeight: listsHeight + 20
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+
+        ScrollBar.horizontal: ScrollBar {
+            policy: ScrollBar.AsNeeded
+        }
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
         }
 
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: shapesModel
-            delegate: listComponent
-        }
+        Row {
+            id: listsRow
+            x: (listsFlickable.contentWidth - width) / 2
+            spacing: listColumnSpacing
 
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: scaledShapesModel
-            delegate: listComponent
-        }
+            Repeater {
+                model: listModels
+                delegate: ListView {
+                    required property var modelData
 
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: constraintsModel
-            delegate: listComponent
-        }
-
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: characterModel
-            delegate: listComponent
-        }
-
-        ListView {
-            width: mainView.listItemWidth
-            height: count * mainView.listItemHeight
-            model: softBodyModel
-            delegate: listComponent
+                    width: mainView.listItemWidth
+                    height: count * mainView.listItemHeight
+                    interactive: false
+                    model: modelData
+                    delegate: listComponent
+                }
+            }
         }
     }
 }

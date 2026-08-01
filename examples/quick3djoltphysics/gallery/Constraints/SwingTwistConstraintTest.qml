@@ -146,7 +146,6 @@ Item {
                 eulerRotation.z: 90
                 Model {
                     id: model
-                    eulerRotation.z: -90
                     geometry: CapsuleGeometry {
                         height: 3
                         diameter: 1
@@ -186,19 +185,19 @@ Item {
 
                 if (prev !== null) {
                     let constraint = constraintComponent.createObject(viewport.scene, {
-                                            position1: position.plus(Qt.vector3d(-1.5, 0, 0)),
-                                            position2: position.plus(Qt.vector3d(-1.5, 0, 0)),
                                             body1: prev,
                                             body2: body,
-                                            twistAxis1: Qt.vector3d(1, 0, 0),
-                                            twistAxis2: Qt.vector3d(1, 0, 0),
-                                            planeAxis1: Qt.vector3d(0, 1, 0),
-                                            planeAxis2: Qt.vector3d(0, 1, 0),
-                                            normalHalfConeAngle: 60,
-                                            planeHalfConeAngle: 20,
-                                            twistMinAngle: -10,
-                                            twistMaxAngle: 20,
                     });
+                    constraint.settings.position1 = position.plus(Qt.vector3d(-1.5, 0, 0));
+                    constraint.settings.position2 = position.plus(Qt.vector3d(-1.5, 0, 0));
+                    constraint.settings.twistAxis1 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.twistAxis2 = Qt.vector3d(1, 0, 0);
+                    constraint.settings.planeAxis1 = Qt.vector3d(0, 1, 0);
+                    constraint.settings.planeAxis2 = Qt.vector3d(0, 1, 0);
+                    constraint.settings.normalHalfConeAngle = 60;
+                    constraint.settings.planeHalfConeAngle = 20;
+                    constraint.settings.twistMinAngle = -10;
+                    constraint.settings.twistMaxAngle = 20;
                     constraints.push(constraint)
                 }
                 prev = body;

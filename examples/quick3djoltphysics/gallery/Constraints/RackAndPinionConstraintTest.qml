@@ -16,7 +16,6 @@ Item {
     readonly property int nonMoving: 0
     readonly property int moving: 1
 
-    // Mirrors Jolt Samples/Tests/Constraints/RackAndPinionConstraintTest.cpp (gallery scale).
     readonly property real pinionRadius: 2
     readonly property real pinionHalfWidth: 0.2
     readonly property real rackLength: 40
@@ -26,7 +25,7 @@ Item {
     readonly property int pinionNumTeeth: 100
     readonly property int rackNumTeeth: Math.round(
         rackLength * pinionNumTeeth / (2 * Math.PI * pinionRadius))
-    readonly property real rackPinionRatio: RackAndPinionConstraint.ratioFromTeeth(
+    readonly property real rackPinionRatio: rackAndPinionConstraint.ratioFromTeeth(
         rackNumTeeth, rackLength, pinionNumTeeth)
 
     readonly property var anchor: Qt.vector3d(0, 10, 0)
@@ -216,34 +215,41 @@ Item {
             id: pinionHinge
             body1: mount
             body2: pinion
-            point1: anchor
-            point2: anchor
-            hingeAxis1: Qt.vector3d(0, 0, 1)
-            hingeAxis2: Qt.vector3d(0, 0, 1)
-            normalAxis1: Qt.vector3d(1, 0, 0)
-            normalAxis2: Qt.vector3d(1, 0, 0)
+            settings: HingeConstraintSettings {
+                point1: anchor
+                point2: anchor
+                hingeAxis1: Qt.vector3d(0, 0, 1)
+                hingeAxis2: Qt.vector3d(0, 0, 1)
+                normalAxis1: Qt.vector3d(1, 0, 0)
+                normalAxis2: Qt.vector3d(1, 0, 0)
+            }
         }
 
         SliderConstraint {
             id: rackSlider
             body1: mount
             body2: rack
-            point1: anchor
-            point2: anchor
-            sliderAxis1: Qt.vector3d(1, 0, 0)
-            sliderAxis2: Qt.vector3d(1, 0, 0)
-            normalAxis1: Qt.vector3d(0, 0, 1)
-            normalAxis2: Qt.vector3d(0, 0, 1)
-            limitsMin: -rackLength * 0.5
-            limitsMax: rackLength * 0.5
+            settings: SliderConstraintSettings {
+                point1: anchor
+                point2: anchor
+                sliderAxis1: Qt.vector3d(1, 0, 0)
+                sliderAxis2: Qt.vector3d(1, 0, 0)
+                normalAxis1: Qt.vector3d(0, 0, 1)
+                normalAxis2: Qt.vector3d(0, 0, 1)
+                limitsMin: -rackLength * 0.5
+                limitsMax: rackLength * 0.5
+            }
         }
 
         RackAndPinionConstraint {
+            id: rackAndPinionConstraint
             body1: pinion
             body2: rack
-            hingeAxis: Qt.vector3d(0, 0, 1)
-            sliderAxis: Qt.vector3d(1, 0, 0)
-            ratio: rackPinionRatio
+            settings: RackAndPinionConstraintSettings {
+                hingeAxis: Qt.vector3d(0, 0, 1)
+                sliderAxis: Qt.vector3d(1, 0, 0)
+                ratio: rackPinionRatio
+            }
             pinionConstraint: pinionHinge
             rackConstraint: rackSlider
         }

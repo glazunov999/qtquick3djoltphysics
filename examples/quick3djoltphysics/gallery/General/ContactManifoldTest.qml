@@ -150,7 +150,6 @@ Item {
                 objectLayer: moving
                 motionType: Body.Dynamic
                 Model {
-                    eulerRotation.z: -90
                     geometry: CapsuleGeometry {
                         height: 10
                         diameter: 4

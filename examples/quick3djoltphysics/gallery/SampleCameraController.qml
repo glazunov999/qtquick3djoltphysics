@@ -204,12 +204,14 @@ Item {
     Component {
         id: dragConstraintComponent
         DistanceConstraint {
-            limitsSpringSettings: SpringSettings {
-                frequency: 2.0
-                damping: 1.0
+            settings: DistanceConstraintSettings {
+                limitsSpringSettings: SpringSettings {
+                    frequency: 2.0
+                    damping: 1.0
+                }
+                minDistance: 0
+                maxDistance: 0
             }
-            minDistance: 0
-            maxDistance: 0
         }
     }
 
@@ -310,6 +312,10 @@ Item {
         property Node dragConstraint: null
         property Node dragAnchor: null
 
+        property var dragSoftBody: null
+        property int dragVertexIndex: -1
+        property real dragVertexPreviousInverseMass: 0
+
         property var box: null
         property var collideShape: null
 
@@ -357,7 +363,7 @@ Item {
             switch (probeMode) {
             case probePick: {
                 hit = physicsSystem.castRay(start, direction, []);
-                if (hit.body)
+                if (hit.body || hit.softBody)
                     marker.position = hit.position;
                 else
                     marker.position = camera.position.plus(camera.forward.times(0.1));
@@ -367,8 +373,8 @@ Item {
                 point = start.plus(direction.times(0.2));
                 let hits = physicsSystem.collidePoint(point);
                 for (var i = 0; i < hits.length; ++i) {
-                    var body = hits[i];
-                    if (body.motionType !== Body.Dynamic)
+                    var body = hits[i].body;
+                    if (!body || body.motionType !== Body.Dynamic)
                         continue;
                 }
                 marker.position = point;
@@ -427,40 +433,70 @@ Item {
             }
         }
 
+        function startDrag() {
+            if (hit.softBody) {
+                var vertexIndex = hit.softBody.closestVertex(hit.position);
+                if (vertexIndex < 0)
+                    return;
+
+                dragSoftBody = hit.softBody;
+                dragVertexIndex = vertexIndex;
+                dragVertexPreviousInverseMass = dragSoftBody.vertexInverseMass(vertexIndex);
+                dragSoftBody.setVertexInverseMass(vertexIndex, 0);
+            } else if (hit.body && hit.body.motionType === Body.Dynamic) {
+                dragAnchor = dragAnchorComponent.createObject(physicsSystem.scene, { position: hit.position })
+                dragConstraint = dragConstraintComponent.createObject(physicsSystem.scene, {
+                                            body1: dragAnchor,
+                                            body2: hit.body})
+                dragConstraint.settings.point1 = hit.position
+                dragConstraint.settings.point2 = hit.position
+            }
+        }
+
+        function stopDrag() {
+            if (dragConstraint !== null) {
+                dragConstraint.destroy();
+                dragConstraint = null;
+            }
+            if (dragAnchor !== null) {
+                dragAnchor.destroy();
+                dragAnchor = null;
+            }
+            if (dragSoftBody !== null) {
+                dragSoftBody.setVertexInverseMass(dragVertexIndex, dragVertexPreviousInverseMass);
+                dragSoftBody = null;
+                dragVertexIndex = -1;
+                dragVertexPreviousInverseMass = 0;
+            }
+            hit = {}
+        }
+
+        function updateDrag(deltaTime) {
+            var newPos = camera.position.plus(camera.forward.times(dragRayLength * hit.fraction))
+            if (dragSoftBody !== null) {
+                dragSoftBody.driveVertexToPosition(dragVertexIndex, newPos, deltaTime);
+                dragSoftBody.activate();
+            } else {
+                dragAnchor.position = newPos;
+                hit.body.activate();
+            }
+        }
+
         function updateDebug(frameDelta) {
-            if (dragConstraint == null) {
+            if (dragConstraint === null && dragSoftBody === null) {
                 if (marker == null)
                     marker = markerComponent.createObject(physicsSystem.scene);
 
                 castProbe();
                 marker.visible = true;
 
-                if (status.controlDown && hit.body) {
-                    if (hit.body.motionType === Body.Dynamic) {
-                        dragAnchor = dragAnchorComponent.createObject(physicsSystem.scene, { position: hit.position })
-                        dragConstraint = dragConstraintComponent.createObject(physicsSystem.scene, {
-                                                    point1: hit.position,
-                                                    point2: hit.position,
-                                                    body1: dragAnchor,
-                                                    body2: hit.body})
-                    }
-                }
+                if (status.controlDown)
+                    startDrag();
             } else {
-                if (!status.controlDown) {
-                    if (dragConstraint !== null) {
-                        dragConstraint.destroy();
-                        dragConstraint = null;
-                    }
-                    if (dragAnchor !== null) {
-                        dragAnchor.destroy();
-                        dragAnchor = null;
-                    }
-                    hit = {}
-                } else {
-                    var newPos = camera.position.plus(camera.forward.times(dragRayLength * hit.fraction))
-                    dragAnchor.position = newPos;
-                    hit.body.activate();
-                }
+                if (!status.controlDown)
+                    stopDrag();
+                else
+                    updateDrag(updateTimer.frameTime);
                 marker.visible = false;
             }
         }

@@ -52,16 +52,16 @@ void Body::setCollisionGroup(CollisionGroup *collisionGroup)
 
     if (m_collisionGroup) {
         connect(m_collisionGroup, &CollisionGroup::changed, this,
-                        [this] { m_collisionGroupDirty = true; });
+                [this] { updateCollisionGroup(); });
         connect(m_collisionGroup, &QObject::destroyed, this,
-                        [this](QObject *obj)
+                [this](QObject *obj)
         {
             if (m_collisionGroup == obj)
                 setCollisionGroup(nullptr);
         });
     }
 
-    m_collisionGroupDirty = true;
+    updateCollisionGroup();
     emit collisionGroupChanged(collisionGroup);
 }
 
@@ -434,7 +434,7 @@ void Body::setSimulationEnabled(bool simulationEnabled)
         return;
 
     m_simulationEnabled = simulationEnabled;
-    if (m_body) {
+    if (m_body && !m_joltBodyAttached) {
         if (m_simulationEnabled)
             m_bodyInterface->AddBody(m_body->GetID(), static_cast<JPH::EActivation>(m_activation));
         else
@@ -655,6 +655,19 @@ void Body::setPositionAndRotation(const QVector3D &position, const QVector3D &eu
                                             static_cast<JPH::EActivation>(activation));
 }
 
+void Body::notifyShapeChanged(const QVector3D &previousCenterOfMass, bool updateMassProperties)
+{
+    if (m_body == nullptr) {
+        qWarning() << "Warning: Invoking 'notifyShapeChanged' before body is initialized will have no effect";
+        return;
+    }
+
+    m_bodyInterface->NotifyShapeChanged(m_body->GetID(),
+                                        PhysicsUtils::toJoltType(previousCenterOfMass),
+                                        updateMassProperties,
+                                        static_cast<JPH::EActivation>(m_activation));
+}
+
 static QMatrix4x4 calculateKinematicNodeTransform(QQuick3DNode *node,
                                                   QHash<QQuick3DNode *, QMatrix4x4> &transformCache)
 {
@@ -692,8 +705,57 @@ static void getJoltPositionAndRotation(const QMatrix4x4 &transform, JPH::Vec3 &w
     worldPosition = PhysicsUtils::toJoltType(QSSGUtils::mat44::getPosition(transform));
 }
 
+void Body::attachJoltBody(JPH::PhysicsSystem *jolt, JPH::BodyInterface *bodyInterface, JPH::Body *body)
+{
+    Q_ASSERT(jolt != nullptr && bodyInterface != nullptr && body != nullptr);
+
+    detachJoltBody();
+
+    m_jolt = jolt;
+    m_bodyInterface = bodyInterface;
+    m_body = body;
+    m_joltBodyAttached = true;
+    m_body->SetUserData(reinterpret_cast<JPH::uint64>(this));
+
+    m_motionType = static_cast<MotionType>(m_body->GetMotionType());
+    m_bodySettings.mObjectLayer = m_body->GetObjectLayer();
+
+    m_bodyID = m_body->GetID().GetIndexAndSequenceNumber();
+    emit bodyIDChanged(m_bodyID);
+}
+
+void Body::detachJoltBody()
+{
+    if (!m_joltBodyAttached)
+        return;
+
+    if (m_body != nullptr && m_body->GetUserData() == reinterpret_cast<JPH::uint64>(this))
+        m_body->SetUserData(0);
+
+    m_body = nullptr;
+    m_joltBodyAttached = false;
+    m_bodyID = 0;
+    emit bodyIDChanged(m_bodyID);
+}
+
+void Body::refreshMotionTypeFromJolt()
+{
+    if (m_body == nullptr)
+        return;
+
+    const auto motionType = static_cast<MotionType>(m_body->GetMotionType());
+    if (m_motionType == motionType)
+        return;
+
+    m_motionType = motionType;
+    emit motionTypeChanged(m_motionType);
+}
+
 void Body::updateJoltObject()
 {
+    if (m_joltBodyAttached)
+        return;
+
     if (m_jolt == nullptr || m_shape == nullptr)
         return;
 
@@ -750,13 +812,31 @@ void Body::updateJoltObject()
 
     if (m_simulationEnabled)
         m_bodyInterface->AddBody(m_body->GetID(), static_cast<JPH::EActivation>(m_activation));
+    
+    updateCollisionGroup();
 
     m_bodyID = m_body->GetID().GetIndexAndSequenceNumber();
     emit bodyIDChanged(m_bodyID);
 }
 
+void Body::updateCollisionGroup()
+{
+    if (!m_body)
+        return;
+
+    if (m_collisionGroup != nullptr)
+        m_body->SetCollisionGroup(m_collisionGroup->getJoltCollisionGroup());
+    else
+        m_body->SetCollisionGroup(JPH::CollisionGroup());
+}
+
 void Body::cleanup()
 {
+    if (m_joltBodyAttached) {
+        detachJoltBody();
+        return;
+    }
+
     if (m_body) {
         if (m_simulationEnabled)
             m_bodyInterface->RemoveBody(m_body->GetID());
@@ -770,17 +850,8 @@ void Body::preSync(float deltaTime, QHash<QQuick3DNode *, QMatrix4x4> &transform
 {
     Q_UNUSED(deltaTime)
 
-    if (m_body == nullptr)
+    if (m_body == nullptr || m_joltBodyAttached)
         return;
-
-    if (m_collisionGroupDirty) {
-        if (m_collisionGroup != nullptr)
-            m_body->SetCollisionGroup(m_collisionGroup->getJoltCollisionGroup());
-        else
-            m_body->SetCollisionGroup(JPH::CollisionGroup());
-
-        m_collisionGroupDirty = false;
-    }
 
     if (m_motionType == MotionType::Dynamic)
         return;
@@ -820,7 +891,7 @@ void Body::preSync(float deltaTime, QHash<QQuick3DNode *, QMatrix4x4> &transform
 
 void Body::sync()
 {
-    if (m_body == nullptr)
+    if (m_body == nullptr || m_joltBodyAttached)
         return;
 
     const auto pos = m_bodyInterface->GetPosition(m_body->GetID());

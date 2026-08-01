@@ -15,7 +15,7 @@
 
 #include <cfloat>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
@@ -29,16 +29,15 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraint : public AbstractTwoBodyPhysi
     Q_PROPERTY(float limitsMax READ limitsMax WRITE setLimitsMax NOTIFY limitsMaxChanged)
     Q_PROPERTY(SpringSettings *limitsSpringSettings READ limitsSpringSettings WRITE setLimitsSpringSettings NOTIFY limitsSpringSettingsChanged)
     Q_PROPERTY(float maxFrictionForce READ maxFrictionForce WRITE setMaxFrictionForce NOTIFY maxFrictionForceChanged)
-    QML_NAMED_ELEMENT(SliderConstraint)
+    QML_NAMED_ELEMENT(SliderConstraintSettings)
 public:
-    explicit SliderConstraint(QQuick3DNode *parent = nullptr);
-    ~SliderConstraint() override;
+    explicit SliderConstraintSettings(QObject *parent = nullptr);
 
     QVector3D point1() const;
-    void setPoint1(const QVector3D &point);
+    void setPoint1(const QVector3D &point1);
 
     QVector3D point2() const;
-    void setPoint2(const QVector3D &point);
+    void setPoint2(const QVector3D &point2);
 
     bool autoDetectPoint() const;
     void setAutoDetectPoint(bool autoDetectPoint);
@@ -67,11 +66,13 @@ public:
     float maxFrictionForce() const;
     void setMaxFrictionForce(float maxFrictionForce);
 
-    Q_INVOKABLE float getCurrentPosition() const;
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
 
 signals:
-    void point1Changed(const QVector3D &point);
-    void point2Changed(const QVector3D &point);
+    void point1Changed(const QVector3D &point1);
+    void point2Changed(const QVector3D &point2);
     void autoDetectPointChanged(bool autoDetectPoint);
     void sliderAxis1Changed(const QVector3D &sliderAxis1);
     void sliderAxis2Changed(const QVector3D &sliderAxis2);
@@ -82,12 +83,7 @@ signals:
     void limitsSpringSettingsChanged(SpringSettings *limitsSpringSettings);
     void maxFrictionForceChanged(float maxFrictionForce);
 
-protected:
-    void updateJoltObject() override;
-
 private:
-    friend class RackAndPinionConstraint;
-
     QVector3D m_point1;
     QVector3D m_point2;
     bool m_autoDetectPoint = true;
@@ -98,9 +94,33 @@ private:
     float m_limitsMin = -FLT_MAX;
     float m_limitsMax = FLT_MAX;
     SpringSettings *m_limitsSpringSettings = nullptr;
-    QMetaObject::Connection m_limitsSpringSettingsConnection;
     float m_maxFrictionForce = 0.0f;
-    JPH::SliderConstraintSettings m_constraintSettings;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT SliderConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(SliderConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(SliderConstraint)
+public:
+    explicit SliderConstraint(QQuick3DNode *parent = nullptr);
+    ~SliderConstraint() override;
+
+    SliderConstraintSettings *settings() const;
+    void setSettings(SliderConstraintSettings *settings);
+
+    Q_INVOKABLE float getCurrentPosition() const;
+
+signals:
+    void settingsChanged(SliderConstraintSettings *settings);
+
+protected:
+    void updateJoltObject() override;
+
+private:
+    friend class RackAndPinionConstraint;
+
+    SliderConstraintSettings *m_settings = nullptr;
 };
 
 #endif // SLIDERCONSTRAINT_P_H

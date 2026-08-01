@@ -88,6 +88,15 @@ public:
     Q_INVOKABLE void setNumIterationsRuntime(int numIterations);
     Q_INVOKABLE void setVertexVelocity(int vertexIndex, const QVector3D &velocity);
     Q_INVOKABLE void addForce(const QVector3D &force);
+    Q_INVOKABLE void activate();
+
+    Q_INVOKABLE int vertexCount() const;
+    Q_INVOKABLE int closestVertex(const QVector3D &position) const;
+    Q_INVOKABLE QVector3D vertexPosition(int vertexIndex) const;
+    Q_INVOKABLE float vertexInverseMass(int vertexIndex) const;
+    Q_INVOKABLE void setVertexInverseMass(int vertexIndex, float inverseMass);
+    
+    Q_INVOKABLE void driveVertexToPosition(int vertexIndex, const QVector3D &position, float deltaTime);
 
 signals:
     void sharedSettingsChanged(SoftBodySharedSettings *settings);

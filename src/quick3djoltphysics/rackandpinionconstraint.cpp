@@ -7,71 +7,117 @@
 
 #include <QtMath>
 
-RackAndPinionConstraint::RackAndPinionConstraint(QQuick3DNode *parent)
-    : AbstractTwoBodyPhysicsConstraint(parent)
+RackAndPinionConstraintSettings::RackAndPinionConstraintSettings(QObject *parent)
+    : AbstractTwoBodyPhysicsConstraintSettings(parent)
 {
 }
 
-RackAndPinionConstraint::~RackAndPinionConstraint() = default;
-
-QVector3D RackAndPinionConstraint::hingeAxis() const
+QVector3D RackAndPinionConstraintSettings::hingeAxis() const
 {
     return m_hingeAxis;
 }
 
-void RackAndPinionConstraint::setHingeAxis(const QVector3D &hingeAxis)
+void RackAndPinionConstraintSettings::setHingeAxis(const QVector3D &hingeAxis)
 {
     if (m_hingeAxis == hingeAxis)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'hingeAxis' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_hingeAxis = hingeAxis;
     emit hingeAxisChanged(m_hingeAxis);
+    emit changed();
 }
 
-QVector3D RackAndPinionConstraint::sliderAxis() const
+QVector3D RackAndPinionConstraintSettings::sliderAxis() const
 {
     return m_sliderAxis;
 }
 
-void RackAndPinionConstraint::setSliderAxis(const QVector3D &sliderAxis)
+void RackAndPinionConstraintSettings::setSliderAxis(const QVector3D &sliderAxis)
 {
     if (m_sliderAxis == sliderAxis)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'sliderAxis' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_sliderAxis = sliderAxis;
     emit sliderAxisChanged(m_sliderAxis);
+    emit changed();
 }
 
-float RackAndPinionConstraint::ratio() const
+float RackAndPinionConstraintSettings::ratio() const
 {
     return m_ratio;
 }
 
-void RackAndPinionConstraint::setRatio(float ratio)
+void RackAndPinionConstraintSettings::setRatio(float ratio)
 {
     if (qFuzzyCompare(m_ratio, ratio))
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'ratio' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_ratio = ratio;
     emit ratioChanged(m_ratio);
+    emit changed();
+}
+
+JPH::Ref<JPH::TwoBodyConstraintSettings> RackAndPinionConstraintSettings::createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame) const
+{
+    auto *settings = new JPH::RackAndPinionConstraintSettings;
+    applyBaseSettings(*settings);
+    settings->mSpace = static_cast<JPH::EConstraintSpace>(m_space);
+    settings->mHingeAxis = PhysicsUtils::toJoltType(m_hingeAxis);
+    settings->mSliderAxis = PhysicsUtils::toJoltType(m_sliderAxis);
+    settings->mRatio = m_ratio;
+    mapToWorld(settings, localFrame);
+    return settings;
+}
+
+void RackAndPinionConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                                 const QQuick3DNode *localFrame) const
+{
+    if (settings == nullptr || !canMapToWorld(localFrame))
+        return;
+
+    auto *rackAndPinion = JPH::DynamicCast<JPH::RackAndPinionConstraintSettings>(settings);
+    if (rackAndPinion == nullptr)
+        return;
+
+    const QQuaternion rotation = localFrame->sceneRotation();
+    mapDirectionToWorld(rackAndPinion->mHingeAxis, rotation);
+    mapDirectionToWorld(rackAndPinion->mSliderAxis, rotation);
+}
+
+RackAndPinionConstraint::RackAndPinionConstraint(QQuick3DNode *parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
+{
+    setSettings(new RackAndPinionConstraintSettings(this));
+}
+
+RackAndPinionConstraint::~RackAndPinionConstraint() = default;
+
+RackAndPinionConstraintSettings *RackAndPinionConstraint::settings() const
+{
+    return m_settings;
+}
+
+void RackAndPinionConstraint::setSettings(RackAndPinionConstraintSettings *settings)
+{
+    if (m_settings == settings)
+        return;
+
+    if (m_settings != nullptr)
+        m_settings->disconnect(this);
+
+    m_settings = settings;
+
+    if (m_settings != nullptr) {
+        QObject::connect(m_settings, &AbstractPhysicsConstraintSettings::changed, this,
+                         [this] { updateJoltObject(); });
+        QObject::connect(m_settings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_settings == obj)
+                setSettings(nullptr);
+        });
+    }
+
+    updateJoltObject();
+    emit settingsChanged(m_settings);
 }
 
 HingeConstraint *RackAndPinionConstraint::pinionConstraint() const
@@ -189,18 +235,15 @@ void RackAndPinionConstraint::linkRackAndPinionConstraints()
 
 void RackAndPinionConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || !joltBodiesReady())
+    if (m_jolt == nullptr || !joltBodiesReady() || m_settings == nullptr)
         return;
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
-    m_constraintSettings.mHingeAxis = PhysicsUtils::toJoltType(m_hingeAxis);
-    m_constraintSettings.mSliderAxis = PhysicsUtils::toJoltType(m_sliderAxis);
-    m_constraintSettings.mRatio = m_ratio;
-
-    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
+    const JPH::Ref<JPH::TwoBodyConstraintSettings> settings =
+            m_settings->createJoltTwoBodyConstraintSettings();
+    m_constraint = settings->Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
     linkRackAndPinionConstraints();
 }

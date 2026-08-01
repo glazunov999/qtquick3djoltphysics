@@ -1,0 +1,649 @@
+MetaInfo {
+
+    Type {
+        name: "QtQuick3D.JoltPhysics.PhysicsSystem"
+        icon: "images/physicssystem16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: false
+        }
+
+        ItemLibraryEntry {
+            name: "Physics System"
+            category: "Components"
+            libraryIcon: "images/physicssystem.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.PhysicsSettings"
+        icon: "images/physicssettings16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: false
+        }
+
+        ItemLibraryEntry {
+            name: "Physics Settings"
+            category: "Components"
+            libraryIcon: "images/physicssettings.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.CollisionGroup"
+        icon: "images/collisiongroup16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: false
+        }
+
+        ItemLibraryEntry {
+            name: "Collision Group"
+            category: "Components"
+            libraryIcon: "images/collisiongroup.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.GroupFilterTable"
+        icon: "images/groupfiltertable16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: false
+        }
+
+        ItemLibraryEntry {
+            name: "Group Filter Table"
+            category: "Components"
+            libraryIcon: "images/groupfiltertable.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.Body"
+        icon: "images/body16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Body"
+            category: "Collision Bodies"
+            libraryIcon: "images/body.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.Character"
+        icon: "images/character16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Character"
+            category: "Collision Bodies"
+            libraryIcon: "images/character.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.CharacterVirtual"
+        icon: "images/charactervirtual16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Character Virtual"
+            category: "Collision Bodies"
+            libraryIcon: "images/charactervirtual.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.SoftBody"
+        icon: "images/softbody16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Soft Body"
+            category: "Collision Bodies"
+            libraryIcon: "images/softbody.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.Ragdoll"
+        icon: "images/ragdoll16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Ragdoll"
+            category: "Collision Bodies"
+            libraryIcon: "images/ragdoll.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.BoxShape"
+        icon: "images/boxshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Box Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/boxshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.CapsuleShape"
+        icon: "images/capsuleshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Capsule Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/capsuleshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.SphereShape"
+        icon: "images/sphereshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Sphere Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/sphereshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.PlaneShape"
+        icon: "images/planeshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Plane Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/planeshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.HeightFieldShape"
+        icon: "images/heightfieldshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Height Field Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/heightfieldshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.ConvexHullShape"
+        icon: "images/convexhullshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Convex Hull Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/convexhullshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.MeshShape"
+        icon: "images/meshshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Mesh Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/meshshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.CylinderShape"
+        icon: "images/cylindershape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Cylinder Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/cylindershape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.TaperedCapsuleShape"
+        icon: "images/taperedcapsuleshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Tapered Capsule Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/taperedcapsuleshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.TaperedCylinderShape"
+        icon: "images/taperedcylindershape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Tapered Cylinder Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/taperedcylindershape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.StaticCompoundShape"
+        icon: "images/staticcompoundshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Static Compound Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/staticcompoundshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.MutableCompoundShape"
+        icon: "images/mutablecompoundshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Mutable Compound Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/mutablecompoundshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.EmptyShape"
+        icon: "images/emptyshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Empty Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/emptyshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.RotatedTranslatedShape"
+        icon: "images/rotatedtranslatedshape16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Rotated Translated Shape"
+            category: "Collision Shapes"
+            libraryIcon: "images/rotatedtranslatedshape.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.FixedConstraint"
+        icon: "images/fixedconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Fixed Constraint"
+            category: "Constraints"
+            libraryIcon: "images/fixedconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.DistanceConstraint"
+        icon: "images/distanceconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Distance Constraint"
+            category: "Constraints"
+            libraryIcon: "images/distanceconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.HingeConstraint"
+        icon: "images/hingeconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Hinge Constraint"
+            category: "Constraints"
+            libraryIcon: "images/hingeconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.SliderConstraint"
+        icon: "images/sliderconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Slider Constraint"
+            category: "Constraints"
+            libraryIcon: "images/sliderconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.ConeConstraint"
+        icon: "images/coneconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Cone Constraint"
+            category: "Constraints"
+            libraryIcon: "images/coneconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.SwingTwistConstraint"
+        icon: "images/swingtwistconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Swing Twist Constraint"
+            category: "Constraints"
+            libraryIcon: "images/swingtwistconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.PointConstraint"
+        icon: "images/pointconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Point Constraint"
+            category: "Constraints"
+            libraryIcon: "images/pointconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.PulleyConstraint"
+        icon: "images/pulleyconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Pulley Constraint"
+            category: "Constraints"
+            libraryIcon: "images/pulleyconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.GearConstraint"
+        icon: "images/gearconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Gear Constraint"
+            category: "Constraints"
+            libraryIcon: "images/gearconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.RackAndPinionConstraint"
+        icon: "images/rackandpinionconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Rack And Pinion Constraint"
+            category: "Constraints"
+            libraryIcon: "images/rackandpinionconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+    Type {
+        name: "QtQuick3D.JoltPhysics.PathConstraint"
+        icon: "images/pathconstraint16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Path Constraint"
+            category: "Constraints"
+            libraryIcon: "images/pathconstraint.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics"
+        }
+    }
+}

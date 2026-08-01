@@ -125,7 +125,6 @@ Item {
             position: Qt.vector3d(-20, 10, 0)
             eulerRotation.z: -90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 4
                     diameter: 1
@@ -156,7 +155,6 @@ Item {
             scale: Qt.vector3d(0.25, 0.25, 0.25)
             eulerRotation.z: -90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 4
                     diameter: 1
@@ -187,7 +185,6 @@ Item {
             scale: Qt.vector3d(2, 2, 2)
             eulerRotation.z: -90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 4
                     diameter: 1
@@ -218,7 +215,6 @@ Item {
             scale: Qt.vector3d(-1.5, -1.5, 1.5)
             eulerRotation.z: -90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 4
                     diameter: 1
@@ -248,7 +244,6 @@ Item {
             position: Qt.vector3d(20, 10, 0)
             scale: Qt.vector3d(-0.75, 0.75, 0.75)
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 4
                     diameter: 1

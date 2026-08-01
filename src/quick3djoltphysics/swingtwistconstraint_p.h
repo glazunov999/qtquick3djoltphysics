@@ -2,6 +2,7 @@
 #define SWINGTWISTCONSTRAINT_P_H
 
 #include "abstracttwobodyphysicsconstraint_p.h"
+#include "motorsettings_p.h"
 
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
 #include <QtQuick3D/private/qquick3dnode_p.h>
@@ -12,7 +13,7 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D position1 READ position1 WRITE setPosition1 NOTIFY position1Changed)
@@ -27,16 +28,17 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraint : public AbstractTwoBodyP
     Q_PROPERTY(float twistMinAngle READ twistMinAngle WRITE setTwistMinAngle NOTIFY twistMinAngleChanged)
     Q_PROPERTY(float twistMaxAngle READ twistMaxAngle WRITE setTwistMaxAngle NOTIFY twistMaxAngleChanged)
     Q_PROPERTY(float maxFrictionTorque READ maxFrictionTorque WRITE setMaxFrictionTorque NOTIFY maxFrictionTorqueChanged)
-    QML_NAMED_ELEMENT(SwingTwistConstraint)
+    Q_PROPERTY(MotorSettings *swingMotorSettings READ swingMotorSettings WRITE setSwingMotorSettings NOTIFY swingMotorSettingsChanged)
+    Q_PROPERTY(MotorSettings *twistMotorSettings READ twistMotorSettings WRITE setTwistMotorSettings NOTIFY twistMotorSettingsChanged)
+    QML_NAMED_ELEMENT(SwingTwistConstraintSettings)
 public:
-    explicit SwingTwistConstraint(QQuick3DNode *parent = nullptr);
-    ~SwingTwistConstraint() override;
-
     enum class SwingType {
         Cone,
         Pyramid,
     };
     Q_ENUM(SwingType)
+
+    explicit SwingTwistConstraintSettings(QObject *parent = nullptr);
 
     QVector3D position1() const;
     void setPosition1(const QVector3D &position1);
@@ -74,6 +76,16 @@ public:
     float maxFrictionTorque() const;
     void setMaxFrictionTorque(float maxFrictionTorque);
 
+    MotorSettings *swingMotorSettings() const;
+    void setSwingMotorSettings(MotorSettings *swingMotorSettings);
+
+    MotorSettings *twistMotorSettings() const;
+    void setTwistMotorSettings(MotorSettings *twistMotorSettings);
+
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
 signals:
     void position1Changed(const QVector3D &position1);
     void position2Changed(const QVector3D &position2);
@@ -87,9 +99,8 @@ signals:
     void twistMinAngleChanged(float twistMinAngle);
     void twistMaxAngleChanged(float twistMaxAngle);
     void maxFrictionTorqueChanged(float maxFrictionTorque);
-
-protected:
-    void updateJoltObject() override;
+    void swingMotorSettingsChanged(MotorSettings *swingMotorSettings);
+    void twistMotorSettingsChanged(MotorSettings *twistMotorSettings);
 
 private:
     QVector3D m_position1;
@@ -98,11 +109,36 @@ private:
     QVector3D m_twistAxis2 = QVector3D(1, 0, 0);
     QVector3D m_planeAxis1 = QVector3D(0, 1, 0);
     QVector3D m_planeAxis2 = QVector3D(0, 1, 0);
+    SwingType m_swingType = SwingType::Cone;
     float m_normalHalfConeAngle = 0.0f;
     float m_planeHalfConeAngle = 0.0f;
     float m_twistMinAngle = 0.0f;
     float m_twistMaxAngle = 0.0f;
-    JPH::SwingTwistConstraintSettings m_constraintSettings;
+    float m_maxFrictionTorque = 0.0f;
+    MotorSettings *m_swingMotorSettings = nullptr;
+    MotorSettings *m_twistMotorSettings = nullptr;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT SwingTwistConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(SwingTwistConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(SwingTwistConstraint)
+public:
+    explicit SwingTwistConstraint(QQuick3DNode *parent = nullptr);
+    ~SwingTwistConstraint() override;
+
+    SwingTwistConstraintSettings *settings() const;
+    void setSettings(SwingTwistConstraintSettings *settings);
+
+signals:
+    void settingsChanged(SwingTwistConstraintSettings *settings);
+
+protected:
+    void updateJoltObject() override;
+
+private:
+    SwingTwistConstraintSettings *m_settings = nullptr;
 };
 
 #endif // SWINGTWISTCONSTRAINT_P_H

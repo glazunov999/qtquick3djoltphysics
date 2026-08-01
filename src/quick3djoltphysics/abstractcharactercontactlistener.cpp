@@ -24,6 +24,29 @@ static inline JPH::CharacterContactSettings toJoltCharacterContactSettings(const
     return ioSettings;
 }
 
+static inline AbstractCharacterContactListener::Contact toBodyContact(const JPH::CharacterContact &inContact)
+{
+    AbstractCharacterContactListener::Contact contact;
+    contact.bodyID2 = inContact.mBodyB.GetIndexAndSequenceNumber();
+    contact.contactPosition = PhysicsUtils::toQtType(inContact.mPosition);
+    contact.contactNormal = PhysicsUtils::toQtType(inContact.mContactNormal);
+    return contact;
+}
+
+static inline AbstractCharacterContactListener::Contact toCharacterContact(const JPH::CharacterContact &inContact)
+{
+    auto *otherCharacter = inContact.mCharacterB != nullptr
+        ? reinterpret_cast<CharacterVirtual *>(inContact.mCharacterB->GetUserData())
+        : nullptr;
+    Q_ASSERT(otherCharacter);
+
+    AbstractCharacterContactListener::Contact contact;
+    contact.bodyID2 = otherCharacter->bodyID();
+    contact.contactPosition = PhysicsUtils::toQtType(inContact.mPosition);
+    contact.contactNormal = PhysicsUtils::toQtType(inContact.mContactNormal);
+    return contact;
+}
+
 class CharacterContactListenerImpl : public JPH::CharacterContactListener
 {
 public:
@@ -42,20 +65,21 @@ public:
         ioAngularVelocity = PhysicsUtils::toJoltType(angularVelocity);
     }
 
-    void OnContactAdded(const JPH::CharacterVirtual *inCharacter, const JPH::BodyID &inBodyID2, const JPH::SubShapeID &inSubShapeID2, JPH::RVec3Arg inContactPosition, JPH::Vec3Arg inContactNormal, JPH::CharacterContactSettings &ioSettings) override
+    void OnContactAdded(const JPH::CharacterVirtual *inCharacter, const JPH::CharacterContact &inContact, JPH::CharacterContactSettings &ioSettings) override
     {
         Q_UNUSED(inCharacter);
-        Q_UNUSED(inSubShapeID2);
 
         auto settings = toCharacterContactSettings(ioSettings);
+        m_d->onContactAdded(toBodyContact(inContact), settings);
+        ioSettings = toJoltCharacterContactSettings(settings);
+    }
 
-        AbstractCharacterContactListener::Contact contact;
-        contact.bodyID2 = inBodyID2.GetIndexAndSequenceNumber();
-        contact.contactPosition = PhysicsUtils::toQtType(inContactPosition);
-        contact.contactNormal = PhysicsUtils::toQtType(inContactNormal);
+    void OnContactPersisted(const JPH::CharacterVirtual *inCharacter, const JPH::CharacterContact &inContact, JPH::CharacterContactSettings &ioSettings) override
+    {
+        Q_UNUSED(inCharacter);
 
-        m_d->onContactAdded(contact, settings);
-
+        auto settings = toCharacterContactSettings(ioSettings);
+        m_d->onContactAdded(toBodyContact(inContact), settings);
         ioSettings = toJoltCharacterContactSettings(settings);
     }
 
@@ -82,23 +106,21 @@ public:
         ioNewCharacterVelocity = PhysicsUtils::toJoltType(newCharacterVelocity);
     }
 
-    void OnCharacterContactAdded(const JPH::CharacterVirtual *inCharacter, const JPH::CharacterVirtual *inOtherCharacter, const JPH::SubShapeID &inSubShapeID2, JPH::RVec3Arg inContactPosition, JPH::Vec3Arg inContactNormal, JPH::CharacterContactSettings &ioSettings) override
+    void OnCharacterContactAdded(const JPH::CharacterVirtual *inCharacter, const JPH::CharacterContact &inContact, JPH::CharacterContactSettings &ioSettings) override
     {
         Q_UNUSED(inCharacter);
-        Q_UNUSED(inSubShapeID2);
 
         auto settings = toCharacterContactSettings(ioSettings);
+        m_d->onCharacterContactAdded(toCharacterContact(inContact), settings);
+        ioSettings = toJoltCharacterContactSettings(settings);
+    }
 
-        auto *otherCharacter = reinterpret_cast<CharacterVirtual *>(inOtherCharacter->GetUserData());
-        Q_ASSERT(otherCharacter);
+    void OnCharacterContactPersisted(const JPH::CharacterVirtual *inCharacter, const JPH::CharacterContact &inContact, JPH::CharacterContactSettings &ioSettings) override
+    {
+        Q_UNUSED(inCharacter);
 
-        AbstractCharacterContactListener::Contact contact;
-        contact.bodyID2 = otherCharacter->bodyID();
-        contact.contactPosition = PhysicsUtils::toQtType(inContactPosition);
-        contact.contactNormal = PhysicsUtils::toQtType(inContactNormal);
-
-        m_d->onCharacterContactAdded(contact, settings);
-
+        auto settings = toCharacterContactSettings(ioSettings);
+        m_d->onCharacterContactAdded(toCharacterContact(inContact), settings);
         ioSettings = toJoltCharacterContactSettings(settings);
     }
 

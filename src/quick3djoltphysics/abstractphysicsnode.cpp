@@ -12,6 +12,20 @@ AbstractPhysicsNode::~AbstractPhysicsNode()
     PhysicsSystem::deregisterPhysicsNode(this);
 }
 
+AbstractPhysicsNode::Activation AbstractPhysicsNode::activation() const
+{
+    return m_activation;
+}
+
+void AbstractPhysicsNode::setActivation(Activation activation)
+{
+    if (m_activation == activation)
+        return;
+
+    m_activation = activation;
+    emit activationChanged(activation);
+}
+
 void AbstractPhysicsNode::componentComplete()
 {
     QQuick3DNode::componentComplete();
@@ -24,6 +38,23 @@ void AbstractPhysicsNode::preSync(float /*deltaTime*/, QHash<QQuick3DNode *, QMa
 
 void AbstractPhysicsNode::sync() { }
 
+void AbstractPhysicsNode::markJoltObjectDirty()
+{
+    if (m_removed)
+        return;
+
+    m_joltObjectDirty = true;
+}
+
+void AbstractPhysicsNode::rebuildJoltObjectIfDirty()
+{
+    if (!m_joltObjectDirty || m_removed || m_jolt == nullptr)
+        return;
+
+    m_joltObjectDirty = false;
+    updateJoltObject();
+}
+
 void AbstractPhysicsNode::init(JPH::PhysicsSystem *jolt, JPH::TempAllocator *tempAllocator)
 {
     Q_ASSERT(jolt);
@@ -32,6 +63,7 @@ void AbstractPhysicsNode::init(JPH::PhysicsSystem *jolt, JPH::TempAllocator *tem
     m_jolt = jolt;
     m_tempAllocator = tempAllocator;
     m_bodyInterface = &jolt->GetBodyInterface();
+    m_joltObjectDirty = false;
 
     updateJoltObject();
 }

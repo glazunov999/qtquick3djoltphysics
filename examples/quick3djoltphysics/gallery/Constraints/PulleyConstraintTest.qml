@@ -154,10 +154,12 @@ Item {
         PulleyConstraint {
             body1: v0a
             body2: v0b
-            bodyPoint1: Qt.vector3d(-10, 10.5, 0)
-            fixedPoint1: Qt.vector3d(-10, 20.5, 0)
-            bodyPoint2: Qt.vector3d(10, 10.5, 0)
-            fixedPoint2: Qt.vector3d(10, 20.5, 0)
+            settings: PulleyConstraintSettings {
+                bodyPoint1: Qt.vector3d(-10, 10.5, 0)
+                fixedPoint1: Qt.vector3d(-10, 20.5, 0)
+                bodyPoint2: Qt.vector3d(10, 10.5, 0)
+                fixedPoint2: Qt.vector3d(10, 20.5, 0)
+            }
         }
 
         // Variation 1: fixed length (min = max = -1 → both set from current length at creation)
@@ -200,12 +202,14 @@ Item {
         PulleyConstraint {
             body1: v1a
             body2: v1b
-            bodyPoint1: Qt.vector3d(-10, 10.5, -10)
-            fixedPoint1: Qt.vector3d(-10, 20.5, -10)
-            bodyPoint2: Qt.vector3d(10, 10.5, -10)
-            fixedPoint2: Qt.vector3d(10, 20.5, -10)
-            minLength: -1
-            maxLength: -1
+            settings: PulleyConstraintSettings {
+                bodyPoint1: Qt.vector3d(-10, 10.5, -10)
+                fixedPoint1: Qt.vector3d(-10, 20.5, -10)
+                bodyPoint2: Qt.vector3d(10, 10.5, -10)
+                fixedPoint2: Qt.vector3d(10, 20.5, -10)
+                minLength: -1
+                maxLength: -1
+            }
         }
 
         // Variation 2: min / max length range
@@ -248,12 +252,14 @@ Item {
         PulleyConstraint {
             body1: v2a
             body2: v2b
-            bodyPoint1: Qt.vector3d(-10, 10.5, -20)
-            fixedPoint1: Qt.vector3d(-10, 20.5, -20)
-            bodyPoint2: Qt.vector3d(10, 10.5, -20)
-            fixedPoint2: Qt.vector3d(10, 20.5, -20)
-            minLength: 18
-            maxLength: 22
+            settings: PulleyConstraintSettings {
+                bodyPoint1: Qt.vector3d(-10, 10.5, -20)
+                fixedPoint1: Qt.vector3d(-10, 20.5, -20)
+                bodyPoint2: Qt.vector3d(10, 10.5, -20)
+                fixedPoint2: Qt.vector3d(10, 20.5, -20)
+                minLength: 18
+                maxLength: 22
+            }
         }
 
         // Variation 3: ratio (block and tackle style)
@@ -296,11 +302,13 @@ Item {
         PulleyConstraint {
             body1: v3a
             body2: v3b
-            bodyPoint1: Qt.vector3d(-10, 10.5, -30)
-            fixedPoint1: Qt.vector3d(-10, 20.5, -30)
-            bodyPoint2: Qt.vector3d(10, 10.5, -30)
-            fixedPoint2: Qt.vector3d(10, 20.5, -30)
-            ratio: 4
+            settings: PulleyConstraintSettings {
+                bodyPoint1: Qt.vector3d(-10, 10.5, -30)
+                fixedPoint1: Qt.vector3d(-10, 20.5, -30)
+                bodyPoint2: Qt.vector3d(10, 10.5, -30)
+                fixedPoint2: Qt.vector3d(10, 20.5, -30)
+                ratio: 4
+            }
         }
     }
 

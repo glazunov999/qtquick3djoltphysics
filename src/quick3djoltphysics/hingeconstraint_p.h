@@ -14,9 +14,7 @@
 
 #include <QVector3D>
 
-class GearConstraint;
-
-class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
@@ -29,16 +27,15 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraint : public AbstractTwoBodyPhysic
     Q_PROPERTY(float limitsMax READ limitsMax WRITE setLimitsMax NOTIFY limitsMaxChanged)
     Q_PROPERTY(SpringSettings *limitsSpringSettings READ limitsSpringSettings WRITE setLimitsSpringSettings NOTIFY limitsSpringSettingsChanged)
     Q_PROPERTY(float maxFrictionTorque READ maxFrictionTorque WRITE setMaxFrictionTorque NOTIFY maxFrictionTorqueChanged)
-    QML_NAMED_ELEMENT(HingeConstraint)
+    QML_NAMED_ELEMENT(HingeConstraintSettings)
 public:
-    explicit HingeConstraint(QQuick3DNode *parent = nullptr);
-    ~HingeConstraint() override;
+    explicit HingeConstraintSettings(QObject *parent = nullptr);
 
     QVector3D point1() const;
-    void setPoint1(const QVector3D &point);
+    void setPoint1(const QVector3D &point1);
 
     QVector3D point2() const;
-    void setPoint2(const QVector3D &point);
+    void setPoint2(const QVector3D &point2);
 
     QVector3D hingeAxis1() const;
     void setHingeAxis1(const QVector3D &hingeAxis1);
@@ -64,9 +61,13 @@ public:
     float maxFrictionTorque() const;
     void setMaxFrictionTorque(float maxFrictionTorque);
 
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
 signals:
-    void point1Changed(const QVector3D &point);
-    void point2Changed(const QVector3D &point);
+    void point1Changed(const QVector3D &point1);
+    void point2Changed(const QVector3D &point2);
     void hingeAxis1Changed(const QVector3D &hingeAxis1);
     void hingeAxis2Changed(const QVector3D &hingeAxis2);
     void normalAxis1Changed(const QVector3D &normalAxis1);
@@ -76,9 +77,6 @@ signals:
     void limitsSpringSettingsChanged(SpringSettings *limitsSpringSettings);
     void maxFrictionTorqueChanged(float maxFrictionTorque);
 
-protected:
-    void updateJoltObject() override;
-
 private:
     QVector3D m_point1;
     QVector3D m_point2;
@@ -86,10 +84,34 @@ private:
     QVector3D m_hingeAxis2 = QVector3D(0, 1, 0);
     QVector3D m_normalAxis1 = QVector3D(1, 0, 0);
     QVector3D m_normalAxis2 = QVector3D(1, 0, 0);
-    float m_limitsMin = -180.0;
-    float m_limitsMax = 180.0;
+    float m_limitsMin = -180.0f;
+    float m_limitsMax = 180.0f;
     SpringSettings *m_limitsSpringSettings = nullptr;
-    JPH::HingeConstraintSettings m_constraintSettings;
+    float m_maxFrictionTorque = 0.0f;
+};
+
+class GearConstraint;
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT HingeConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(HingeConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(HingeConstraint)
+public:
+    explicit HingeConstraint(QQuick3DNode *parent = nullptr);
+    ~HingeConstraint() override;
+
+    HingeConstraintSettings *settings() const;
+    void setSettings(HingeConstraintSettings *settings);
+
+signals:
+    void settingsChanged(HingeConstraintSettings *settings);
+
+protected:
+    void updateJoltObject() override;
+
+private:
+    HingeConstraintSettings *m_settings = nullptr;
 
     friend class GearConstraint;
     friend class RackAndPinionConstraint;

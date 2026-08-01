@@ -7,7 +7,9 @@ ShapeCastResult::ShapeCastResult(const QVector3D &contactPointOn1,
                                  const QVector3D &penetrationAxis,
                                  float penetrationDepth,
                                  const QVector3D &surfaceNormal,
-                                 Body *body2, const QVector3D &position,
+                                 AbstractPhysicsBody *body2,
+                                 SoftBody *softBody2,
+                                 const QVector3D &position,
                                  float fraction,
                                  bool isBackFaceHit)
     : m_contactPointOn1(contactPointOn1)
@@ -16,6 +18,7 @@ ShapeCastResult::ShapeCastResult(const QVector3D &contactPointOn1,
     , m_penetrationDepth(penetrationDepth)
     , m_surfaceNormal(surfaceNormal)
     , m_body2(body2)
+    , m_softBody2(softBody2)
     , m_position(position)
     , m_fraction(fraction)
     , m_isBackFaceHit(isBackFaceHit)
@@ -47,9 +50,14 @@ QVector3D ShapeCastResult::surfaceNormal() const
     return m_surfaceNormal;
 }
 
-Body *ShapeCastResult::body2() const
+AbstractPhysicsBody *ShapeCastResult::body2() const
 {
     return m_body2;
+}
+
+SoftBody *ShapeCastResult::softBody2() const
+{
+    return m_softBody2;
 }
 
 QVector3D ShapeCastResult::position() const

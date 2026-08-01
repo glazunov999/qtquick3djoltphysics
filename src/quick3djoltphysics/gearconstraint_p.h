@@ -13,18 +13,15 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT GearConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT GearConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D hingeAxis1 READ hingeAxis1 WRITE setHingeAxis1 NOTIFY hingeAxis1Changed)
     Q_PROPERTY(QVector3D hingeAxis2 READ hingeAxis2 WRITE setHingeAxis2 NOTIFY hingeAxis2Changed)
     Q_PROPERTY(float ratio READ ratio WRITE setRatio NOTIFY ratioChanged)
-    Q_PROPERTY(HingeConstraint *gear1Constraint READ gear1Constraint WRITE setGear1Constraint NOTIFY gear1ConstraintChanged)
-    Q_PROPERTY(HingeConstraint *gear2Constraint READ gear2Constraint WRITE setGear2Constraint NOTIFY gear2ConstraintChanged)
-    QML_NAMED_ELEMENT(GearConstraint)
+    QML_NAMED_ELEMENT(GearConstraintSettings)
 public:
-    explicit GearConstraint(QQuick3DNode *parent = nullptr);
-    ~GearConstraint() override;
+    explicit GearConstraintSettings(QObject *parent = nullptr);
 
     QVector3D hingeAxis1() const;
     void setHingeAxis1(const QVector3D &hingeAxis1);
@@ -35,6 +32,35 @@ public:
     float ratio() const;
     void setRatio(float ratio);
 
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
+signals:
+    void hingeAxis1Changed(const QVector3D &hingeAxis1);
+    void hingeAxis2Changed(const QVector3D &hingeAxis2);
+    void ratioChanged(float ratio);
+
+private:
+    QVector3D m_hingeAxis1 = QVector3D(1, 0, 0);
+    QVector3D m_hingeAxis2 = QVector3D(1, 0, 0);
+    float m_ratio = 1.0f;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT GearConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(GearConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    Q_PROPERTY(HingeConstraint *gear1Constraint READ gear1Constraint WRITE setGear1Constraint NOTIFY gear1ConstraintChanged)
+    Q_PROPERTY(HingeConstraint *gear2Constraint READ gear2Constraint WRITE setGear2Constraint NOTIFY gear2ConstraintChanged)
+    QML_NAMED_ELEMENT(GearConstraint)
+public:
+    explicit GearConstraint(QQuick3DNode *parent = nullptr);
+    ~GearConstraint() override;
+
+    GearConstraintSettings *settings() const;
+    void setSettings(GearConstraintSettings *settings);
+
     HingeConstraint *gear1Constraint() const;
     void setGear1Constraint(HingeConstraint *constraint);
 
@@ -44,9 +70,7 @@ public:
     Q_INVOKABLE float getTotalLambda() const;
 
 signals:
-    void hingeAxis1Changed(const QVector3D &hingeAxis1);
-    void hingeAxis2Changed(const QVector3D &hingeAxis2);
-    void ratioChanged(float ratio);
+    void settingsChanged(GearConstraintSettings *settings);
     void gear1ConstraintChanged(HingeConstraint *constraint);
     void gear2ConstraintChanged(HingeConstraint *constraint);
 
@@ -58,16 +82,13 @@ private:
     void watchGearHinge(HingeConstraint *hinge, QMetaObject::Connection &body1Connection,
                         QMetaObject::Connection &body2Connection);
 
-    QVector3D m_hingeAxis1 = QVector3D(1, 0, 0);
-    QVector3D m_hingeAxis2 = QVector3D(1, 0, 0);
-    float m_ratio = 1.0f;
+    GearConstraintSettings *m_settings = nullptr;
     HingeConstraint *m_gear1Constraint = nullptr;
     HingeConstraint *m_gear2Constraint = nullptr;
     QMetaObject::Connection m_gear1Body1SignalConnection;
     QMetaObject::Connection m_gear1Body2SignalConnection;
     QMetaObject::Connection m_gear2Body1SignalConnection;
     QMetaObject::Connection m_gear2Body2SignalConnection;
-    JPH::GearConstraintSettings m_constraintSettings;
 };
 
 #endif // GEARCONSTRAINT_P_H

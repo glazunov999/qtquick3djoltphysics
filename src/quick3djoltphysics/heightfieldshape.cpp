@@ -301,7 +301,7 @@ void HeightFieldShape::createJoltShape()
         JPH::HeightFieldShapeSettings settings(samples->data(), hfOffset, hfScale, sampleCount);
         settings.mBlockSize = 4;
         m_joltShape = settings.Create().Get();
-        m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(sceneScale()));
+        m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(physicsScale()));
 
         qCDebug(lcQuick3dJoltPhysics) << "created height field"
                                       << m_extents << m_heightField->columns()

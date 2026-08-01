@@ -126,7 +126,6 @@ Item {
             position: Qt.vector3d(0, 75, 0)
             eulerRotation.z: 90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 5
                     diameter: 2
@@ -156,7 +155,6 @@ Item {
             position: Qt.vector3d(0, 75, 10)
             eulerRotation.z: 90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 5
                     diameter: 2
@@ -189,7 +187,6 @@ Item {
                 eulerRotation.z: 90
                 Model {
                     id: model
-                    eulerRotation.z: -90
                     geometry: CapsuleGeometry {
                         height: 5
                         diameter: 2
@@ -230,10 +227,12 @@ Item {
                 let point1 = position.plus(Qt.vector3d(-7.5, 0, 0));
                 let point2 = position.plus(Qt.vector3d(-2.5, 0, 0));
                 let constraint = constraintComponent.createObject(viewport.scene, {
-                                                                      point1: point1, point2: point2,
-                                                                      body1: prev, body2: body,
-                                                                      minDistance: minDistance, maxDistance: maxDistance
+                                                                      body1: prev, body2: body
                                                                   });
+                constraint.settings.point1 = point1;
+                constraint.settings.point2 = point2;
+                constraint.settings.minDistance = minDistance;
+                constraint.settings.maxDistance = maxDistance;
                 prev = body;
             }
         }

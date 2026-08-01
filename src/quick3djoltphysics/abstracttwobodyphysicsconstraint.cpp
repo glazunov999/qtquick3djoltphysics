@@ -1,6 +1,61 @@
 #include "abstracttwobodyphysicsconstraint_p.h"
+#include "physicsutils_p.h"
 
+#include <QtQuick3D/private/qquick3dnode_p.h>
 #include <QtQuick3D/private/qquick3dobject_p.h>
+
+AbstractTwoBodyPhysicsConstraintSettings::AbstractTwoBodyPhysicsConstraintSettings(QObject *parent)
+    : AbstractPhysicsConstraintSettings(parent)
+{
+}
+
+AbstractTwoBodyPhysicsConstraintSettings::~AbstractTwoBodyPhysicsConstraintSettings() = default;
+
+AbstractTwoBodyPhysicsConstraintSettings::ConstraintSpace AbstractTwoBodyPhysicsConstraintSettings::space() const
+{
+    return m_space;
+}
+
+void AbstractTwoBodyPhysicsConstraintSettings::setSpace(ConstraintSpace space)
+{
+    if (m_space == space)
+        return;
+
+    m_space = space;
+    emit spaceChanged(m_space);
+    emit changed();
+}
+
+JPH::Ref<JPH::ConstraintSettings> AbstractTwoBodyPhysicsConstraintSettings::createJoltConstraintSettings() const
+{
+    return static_cast<JPH::ConstraintSettings *>(createJoltTwoBodyConstraintSettings().GetPtr());
+}
+
+void AbstractTwoBodyPhysicsConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                                          const QQuick3DNode *localFrame) const
+{
+    Q_UNUSED(settings);
+    Q_UNUSED(localFrame);
+}
+
+bool AbstractTwoBodyPhysicsConstraintSettings::canMapToWorld(const QQuick3DNode *localFrame) const
+{
+    return localFrame != nullptr && m_space == ConstraintSpace::WorldSpace;
+}
+
+void AbstractTwoBodyPhysicsConstraintSettings::mapPositionToWorld(JPH::Vec3 &position,
+                                                                  const QQuick3DNode *localFrame)
+{
+    position = PhysicsUtils::toJoltType(
+            localFrame->mapPositionToScene(PhysicsUtils::toQtType(position)));
+}
+
+void AbstractTwoBodyPhysicsConstraintSettings::mapDirectionToWorld(JPH::Vec3 &direction,
+                                                                   const QQuaternion &rotation)
+{
+    direction = PhysicsUtils::toJoltType(
+            rotation.rotatedVector(PhysicsUtils::toQtType(direction)).normalized());
+}
 
 AbstractTwoBodyPhysicsConstraint::AbstractTwoBodyPhysicsConstraint(QQuick3DNode *parent)
     : AbstractPhysicsConstraint(parent)
@@ -57,26 +112,6 @@ void AbstractTwoBodyPhysicsConstraint::setBody2(Body *body)
     emit body2Changed(m_body2);
 }
 
-AbstractTwoBodyPhysicsConstraint::ConstraintSpace AbstractTwoBodyPhysicsConstraint::space() const
-{
-    return m_space;
-}
-
-void AbstractTwoBodyPhysicsConstraint::setSpace(ConstraintSpace space)
-{
-    if (m_space == space)
-        return;
-
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'space' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_space = space;
-    emit spaceChanged(m_space);
-}
-
 bool AbstractTwoBodyPhysicsConstraint::joltBodiesReady() const
 {
     return m_body1 != nullptr && m_body2 != nullptr && m_body1->m_body != nullptr
@@ -92,3 +127,4 @@ JPH::Body *AbstractTwoBodyPhysicsConstraint::joltBody2() const
 {
     return m_body2 ? m_body2->m_body : nullptr;
 }
+

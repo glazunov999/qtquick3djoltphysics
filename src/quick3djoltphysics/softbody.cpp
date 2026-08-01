@@ -7,6 +7,8 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/SoftBody/SoftBodyMotionProperties.h>
 
+#include <limits>
+
 SoftBody::SoftBody(QQuick3DNode *parent)
     : AbstractPhysicsNode(parent)
 {
@@ -35,14 +37,14 @@ void SoftBody::setSharedSettings(SoftBodySharedSettings *settings)
     if (m_sharedSettings) {
         connect(m_sharedSettings, &SoftBodySharedSettings::topologyChanged, this, [this]() {
             if (m_bodyInterface)
-                updateJoltObject();
+                markJoltObjectDirty();
         });
     }
 
     emit sharedSettingsChanged(m_sharedSettings);
 
     if (m_bodyInterface)
-        updateJoltObject();
+        markJoltObjectDirty();
 }
 
 quint32 SoftBody::objectLayer() const
@@ -241,6 +243,126 @@ void SoftBody::addForce(const QVector3D &force)
         return;
 
     m_bodyInterface->AddForce(m_body->GetID(), PhysicsUtils::toJoltType(force));
+}
+
+void SoftBody::activate()
+{
+    if (!m_body || !m_bodyInterface)
+        return;
+
+    m_bodyInterface->ActivateBody(m_body->GetID());
+}
+
+int SoftBody::vertexCount() const
+{
+    if (!m_body || !m_body->IsSoftBody())
+        return 0;
+
+    auto *mp = static_cast<const JPH::SoftBodyMotionProperties *>(m_body->GetMotionProperties());
+    return int(mp->GetVertices().size());
+}
+
+int SoftBody::closestVertex(const QVector3D &position) const
+{
+    if (!m_jolt || !m_body || !m_body->IsSoftBody())
+        return -1;
+
+    JPH::BodyLockRead lock(m_jolt->GetBodyLockInterface(), m_body->GetID());
+    if (!lock.Succeeded())
+        return -1;
+
+    const JPH::Body &body = lock.GetBody();
+    auto *mp = static_cast<const JPH::SoftBodyMotionProperties *>(body.GetMotionProperties());
+    const JPH::Array<JPH::SoftBodyVertex> &vertices = mp->GetVertices();
+
+    const JPH::RVec3 worldPosition(PhysicsUtils::toJoltType(position));
+    const JPH::Vec3 localPosition = JPH::Vec3(body.GetInverseCenterOfMassTransform() * worldPosition);
+
+    int closestIndex = -1;
+    float closestDistanceSq = std::numeric_limits<float>::max();
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        const float distanceSq = (vertices[i].mPosition - localPosition).LengthSq();
+        if (distanceSq < closestDistanceSq) {
+            closestDistanceSq = distanceSq;
+            closestIndex = int(i);
+        }
+    }
+
+    return closestIndex;
+}
+
+QVector3D SoftBody::vertexPosition(int vertexIndex) const
+{
+    if (!m_jolt || !m_body || !m_body->IsSoftBody())
+        return {};
+
+    JPH::BodyLockRead lock(m_jolt->GetBodyLockInterface(), m_body->GetID());
+    if (!lock.Succeeded())
+        return {};
+
+    const JPH::Body &body = lock.GetBody();
+    auto *mp = static_cast<const JPH::SoftBodyMotionProperties *>(body.GetMotionProperties());
+    const JPH::Array<JPH::SoftBodyVertex> &vertices = mp->GetVertices();
+    if (vertexIndex < 0 || vertexIndex >= int(vertices.size()))
+        return {};
+
+    return PhysicsUtils::toQtType(
+        JPH::Vec3(body.GetCenterOfMassTransform() * vertices[static_cast<uint32_t>(vertexIndex)].mPosition));
+}
+
+float SoftBody::vertexInverseMass(int vertexIndex) const
+{
+    if (!m_jolt || !m_body || !m_body->IsSoftBody())
+        return 0.0f;
+
+    JPH::BodyLockRead lock(m_jolt->GetBodyLockInterface(), m_body->GetID());
+    if (!lock.Succeeded())
+        return 0.0f;
+
+    auto *mp = static_cast<const JPH::SoftBodyMotionProperties *>(lock.GetBody().GetMotionProperties());
+    const JPH::Array<JPH::SoftBodyVertex> &vertices = mp->GetVertices();
+    if (vertexIndex < 0 || vertexIndex >= int(vertices.size()))
+        return 0.0f;
+
+    return vertices[static_cast<uint32_t>(vertexIndex)].mInvMass;
+}
+
+void SoftBody::setVertexInverseMass(int vertexIndex, float inverseMass)
+{
+    if (!m_jolt || !m_body || !m_body->IsSoftBody())
+        return;
+
+    JPH::BodyLockWrite lock(m_jolt->GetBodyLockInterface(), m_body->GetID());
+    if (!lock.Succeeded())
+        return;
+
+    auto *mp = static_cast<JPH::SoftBodyMotionProperties *>(lock.GetBody().GetMotionProperties());
+    JPH::Array<JPH::SoftBodyVertex> &vertices = mp->GetVertices();
+    if (vertexIndex < 0 || vertexIndex >= int(vertices.size()))
+        return;
+
+    vertices[static_cast<uint32_t>(vertexIndex)].mInvMass = inverseMass;
+}
+
+void SoftBody::driveVertexToPosition(int vertexIndex, const QVector3D &position, float deltaTime)
+{
+    if (!m_jolt || !m_body || !m_body->IsSoftBody() || deltaTime <= 0.0f)
+        return;
+
+    JPH::BodyLockWrite lock(m_jolt->GetBodyLockInterface(), m_body->GetID());
+    if (!lock.Succeeded())
+        return;
+
+    JPH::Body &body = lock.GetBody();
+    auto *mp = static_cast<JPH::SoftBodyMotionProperties *>(body.GetMotionProperties());
+    JPH::Array<JPH::SoftBodyVertex> &vertices = mp->GetVertices();
+    if (vertexIndex < 0 || vertexIndex >= int(vertices.size()))
+        return;
+
+    JPH::SoftBodyVertex &vertex = vertices[static_cast<uint32_t>(vertexIndex)];
+    const JPH::RVec3 targetPosition(PhysicsUtils::toJoltType(position));
+    const JPH::Vec3 delta = JPH::Vec3(targetPosition - body.GetCenterOfMassTransform() * vertex.mPosition);
+    vertex.mVelocity = body.GetRotation().Conjugated() * delta / deltaTime;
 }
 
 void SoftBody::updateJoltObject()

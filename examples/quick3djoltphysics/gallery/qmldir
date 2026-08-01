@@ -1,2 +1,4 @@
 module Example
 singleton AppSettings 1.0 AppSettings.qml
+SimpleHumanRagdoll 1.0 Rig/Assets/SimpleHumanRagdoll.qml
+RiggedFigure 1.0 Rig/Assets/RiggedFigure.qml

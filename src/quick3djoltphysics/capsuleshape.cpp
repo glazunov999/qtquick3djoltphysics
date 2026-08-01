@@ -48,5 +48,5 @@ void CapsuleShape::setHeight(float height)
 void CapsuleShape::createJoltShape()
 {
     m_joltShape = new JPH::CapsuleShape(m_height * 0.5f, m_diameter * 0.5f);
-    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(sceneScale()));
+    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(physicsScale()));
 }

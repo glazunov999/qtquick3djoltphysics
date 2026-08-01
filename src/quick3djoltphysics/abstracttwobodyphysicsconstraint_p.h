@@ -7,17 +7,21 @@
 #include <QtQuick3DJoltPhysics/qtquick3djoltphysicsglobal.h>
 #include <QtQml/QQmlEngine>
 
+#include <Jolt/Physics/Constraints/TwoBodyConstraint.h>
+
+#include <QQuaternion>
+
 namespace JPH {
 class Body;
 }
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT AbstractTwoBodyPhysicsConstraint : public AbstractPhysicsConstraint
+class QQuick3DNode;
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT AbstractTwoBodyPhysicsConstraintSettings : public AbstractPhysicsConstraintSettings
 {
     Q_OBJECT
-    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
-    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
     Q_PROPERTY(ConstraintSpace space READ space WRITE setSpace NOTIFY spaceChanged)
-    QML_NAMED_ELEMENT(PhysicsTwoBodyConstraint)
+    QML_NAMED_ELEMENT(PhysicsTwoBodyConstraintSettings)
     QML_UNCREATABLE("abstract interface")
 public:
     enum class ConstraintSpace {
@@ -26,6 +30,38 @@ public:
     };
     Q_ENUM(ConstraintSpace)
 
+    explicit AbstractTwoBodyPhysicsConstraintSettings(QObject *parent = nullptr);
+    ~AbstractTwoBodyPhysicsConstraintSettings() override;
+
+    ConstraintSpace space() const;
+    void setSpace(ConstraintSpace space);
+
+    JPH::Ref<JPH::ConstraintSettings> createJoltConstraintSettings() const override;
+    virtual JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(
+            const QQuick3DNode *localFrame = nullptr) const = 0;
+
+    virtual void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                            const QQuick3DNode *localFrame) const;
+
+signals:
+    void spaceChanged(ConstraintSpace space);
+
+protected:
+    bool canMapToWorld(const QQuick3DNode *localFrame) const;
+    static void mapPositionToWorld(JPH::Vec3 &position, const QQuick3DNode *localFrame);
+    static void mapDirectionToWorld(JPH::Vec3 &direction, const QQuaternion &rotation);
+
+    ConstraintSpace m_space = ConstraintSpace::WorldSpace;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT AbstractTwoBodyPhysicsConstraint : public AbstractPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(Body *body1 READ body1 WRITE setBody1 NOTIFY body1Changed)
+    Q_PROPERTY(Body *body2 READ body2 WRITE setBody2 NOTIFY body2Changed)
+    QML_NAMED_ELEMENT(PhysicsTwoBodyConstraint)
+    QML_UNCREATABLE("abstract interface")
+public:
     explicit AbstractTwoBodyPhysicsConstraint(QQuick3DNode *parent = nullptr);
     ~AbstractTwoBodyPhysicsConstraint() override;
 
@@ -35,13 +71,9 @@ public:
     Body *body2() const;
     void setBody2(Body *body);
 
-    ConstraintSpace space() const;
-    void setSpace(ConstraintSpace space);
-
 signals:
     void body1Changed(Body *body1);
     void body2Changed(Body *body2);
-    void spaceChanged(ConstraintSpace space);
 
 protected:
     bool joltBodiesReady() const;
@@ -50,7 +82,6 @@ protected:
 
     Body *m_body1 = nullptr;
     Body *m_body2 = nullptr;
-    ConstraintSpace m_space = ConstraintSpace::WorldSpace;
 
 private:
     QMetaObject::Connection m_body1SignalConnection;

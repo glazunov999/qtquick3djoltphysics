@@ -36,6 +36,8 @@ public:
     float damping() const;
     void setDamping(float damping);
 
+    JPH::SpringSettings getJoltSpringSettings() const;
+
 signals:
     void modeChanged(SpringMode mode);
     void frequencyChanged(float frequency);
@@ -44,11 +46,6 @@ signals:
     void changed();
 
 private:
-    JPH::SpringSettings getJoltSpringSettings() const;
-    friend class DistanceConstraint;
-    friend class HingeConstraint;
-    friend class SliderConstraint;
-
     SpringMode m_mode = SpringMode::FrequencyAndDamping;
     float m_frequency = 0.0f;
     float m_stiffness = 0.0f;

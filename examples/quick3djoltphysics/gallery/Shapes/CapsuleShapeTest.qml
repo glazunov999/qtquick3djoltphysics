@@ -124,7 +124,6 @@ Item {
             motionType: Body.Dynamic
             position: Qt.vector3d(0, 10, 0)
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 5
                     diameter: 4
@@ -153,7 +152,6 @@ Item {
             position: Qt.vector3d(10, 10, 0)
             eulerRotation.x: 90
             Model {
-                eulerRotation.z: -90
                 geometry: CapsuleGeometry {
                     height: 5
                     diameter: 4
@@ -182,7 +180,6 @@ Item {
                 objectLayer: moving
                 motionType: Body.Dynamic
                 Model {
-                    eulerRotation.z: -90
                     geometry: CapsuleGeometry {
                         height: 10
                         diameter: 2

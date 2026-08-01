@@ -264,19 +264,19 @@ Item {
                 if ((i & 1) == 0) {
                     let point = position.plus(Qt.vector3d(-0.5 * 4, 0, 0.5 * 4));
                     constraint = constraintComponent.createObject(viewport.scene, {
-                            point1: point,
-                            point2: point,
                             body1: prev,
                             body2: body,
                     });
+                    constraint.settings.point1 = point;
+                    constraint.settings.point2 = point;
                 } else {
                     let point = position.plus(Qt.vector3d(-0.5 * 4, 0, -0.5 * 4));
                     constraint = constraintComponent.createObject(viewport.scene, {
-                            point1: point,
-                            point2: point,
                             body1: prev,
                             body2: body,
                     });
+                    constraint.settings.point1 = point;
+                    constraint.settings.point2 = point;
                 }
 
                 prev = body;

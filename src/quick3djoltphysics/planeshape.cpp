@@ -31,5 +31,5 @@ void PlaneShape::setExtent(float extent)
 void PlaneShape::createJoltShape()
 {
     m_joltShape = new JPH::PlaneShape(JPH::Plane(JPH::Vec3(0.0f, 0.0f, 1.0f), 0.0f), nullptr, m_extent * 0.5f);
-    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(sceneScale()));
+    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(physicsScale()));
 }

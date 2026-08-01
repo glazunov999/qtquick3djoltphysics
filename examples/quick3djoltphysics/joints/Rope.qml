@@ -32,50 +32,64 @@ Node {
     PointConstraint {
         body1: anchor
         body2: shape0
-        point1: anchor.mapPositionToScene(Qt.vector3d(0, 0, 0))
-        point2: shape0.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: anchor.mapPositionToScene(Qt.vector3d(0, 0, 0))
+            point2: shape0.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     PointConstraint {
         body1: shape0
         body2: shape1
-        point1: shape0.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: shape1.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: shape0.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: shape1.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     PointConstraint {
         body1: shape1
         body2: shape2
-        point1: shape1.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: shape2.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: shape1.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: shape2.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     PointConstraint {
         body1: shape2
         body2: shape3
-        point1: shape2.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: shape3.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: shape2.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: shape3.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     PointConstraint {
         body1: shape3
         body2: shape4
-        point1: shape3.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: shape4.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: shape3.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: shape4.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     PointConstraint {
         body1: shape4
         body2: shape5
-        point1: shape4.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: shape5.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        settings: PointConstraintSettings {
+            point1: shape4.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: shape5.mapPositionToScene(Qt.vector3d(0, linkHalfLength, 0))
+        }
     }
 
     FixedConstraint {
         body1: shape5
         body2: sphere
-        point1: shape5.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
-        point2: sphere.mapPositionToScene(Qt.vector3d(0, 0, 0))
+        settings: FixedConstraintSettings {
+            point1: shape5.mapPositionToScene(Qt.vector3d(0, -linkHalfLength, 0))
+            point2: sphere.mapPositionToScene(Qt.vector3d(0, 0, 0))
+        }
     }
 
     Body {
@@ -93,7 +107,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40
@@ -119,7 +132,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40
@@ -145,7 +157,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40
@@ -171,7 +182,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40
@@ -197,7 +207,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40
@@ -223,7 +232,6 @@ Node {
         objectLayer: moving
         motionType: Body.Dynamic
         Model {
-            eulerRotation: Qt.vector3d(0, 0, -90)
             geometry: CapsuleGeometry {
                 diameter: 10
                 height: 40

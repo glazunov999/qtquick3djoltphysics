@@ -31,18 +31,23 @@ signals:
 protected:
     virtual void createJoltShape() = 0;
     void updateJoltShape();
-    void handleShapeChange();
+    virtual void handleShapeChange();
+    void componentComplete() override;
+
+    QVector3D physicsScale() const;
 
     JPH::Ref<JPH::Shape> m_joltShape = nullptr;
 
 private:
+    void handleSceneScaleChange();
     void updateJoltShapeDensity();
+    bool isCompoundChild() const;
 
     float m_density = 1000.0f;
+    QVector3D m_prevPhysicsScale;
     QMetaObject::Connection m_materialConnection;
 
     friend class Body;
-    friend class StaticCompoundShape;
 };
 
 #endif // ABSTRACTSHAPE_P_H

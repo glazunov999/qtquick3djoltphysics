@@ -1,0 +1,61 @@
+MetaInfo {
+    Type {
+        name: "QtQuick3D.JoltPhysics.Helpers.CapsuleGeometry"
+        icon: "images/capsulegeometry16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Capsule Geometry"
+            category: "Helpers"
+            libraryIcon: "images/capsulegeometry.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics.Helpers"
+        }
+    }
+
+    Type {
+        name: "QtQuick3D.JoltPhysics.Helpers.TaperedCapsuleGeometry"
+        icon: "images/taperedcapsulegeometry16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Tapered Capsule Geometry"
+            category: "Helpers"
+            libraryIcon: "images/taperedcapsulegeometry.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics.Helpers"
+        }
+    }
+
+    Type {
+        name: "QtQuick3D.JoltPhysics.Helpers.TaperedCylinderGeometry"
+        icon: "images/taperedcylindergeometry16.png"
+
+        Hints {
+            visibleInNavigator: true
+            canBeDroppedInNavigator: true
+            canBeDroppedInFormEditor: false
+            canBeDroppedInView3D: true
+        }
+
+        ItemLibraryEntry {
+            name: "Tapered Cylinder Geometry"
+            category: "Helpers"
+            libraryIcon: "images/taperedcylindergeometry.png"
+            version: "6.8"
+            requiredImport: "QtQuick3D.JoltPhysics.Helpers"
+        }
+    }
+}

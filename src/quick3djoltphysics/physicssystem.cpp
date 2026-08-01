@@ -2,9 +2,17 @@
 
 #include "abstractphysicsnode_p.h"
 #include "charactervirtual_p.h"
+#include "debuggeometry_p.h"
+#include "joltdebugrenderer_p.h"
 #include "physicsutils_p.h"
+#include "softbody_p.h"
 
 #include <QtQuick/private/qquickframeanimation_p.h>
+#include <QtQuick3D/private/qquick3dmaterial_p.h>
+#include <QtQuick3D/private/qquick3dmodel_p.h>
+#include <QtQuick3D/private/qquick3dprincipledmaterial_p.h>
+#include <QtQml/qqmllist.h>
+#include <QtQml/private/qqmlengine_p.h>
 
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
@@ -50,6 +58,12 @@ PhysicsSystem::PhysicsSystem(QObject *parent)
     : QObject(parent)
     , m_frameAnimator(new FrameAnimator)
 {
+    m_inDesignStudio = !qEnvironmentVariableIsEmpty("QML_PUPPET_MODE");
+    if (!m_inDesignStudio) {
+        if (auto *engine = qmlEngine(this))
+            m_inDesignStudio = QQmlEnginePrivate::get(engine)->designerMode();
+    }
+
     connect(m_frameAnimator, &QQuickFrameAnimation::triggered, this, &PhysicsSystem::simulateFrame);
 
     if (g_factoryRefCount == 0) {
@@ -60,11 +74,15 @@ PhysicsSystem::PhysicsSystem(QObject *parent)
     g_factoryRefCount++;
     m_tempAllocator = new JPH::TempAllocatorImpl(32 * 1024 * 1024);
 
+    m_debugRenderer = std::make_unique<JoltDebugRenderer>();
+
     physicsSystemManager.physicsSystems.append(this);
 }
 
 PhysicsSystem::~PhysicsSystem()
 {
+    destroyDebugModel();
+
     if (m_frameAnimator) {
         m_frameAnimator->stop();
         delete m_frameAnimator;
@@ -90,22 +108,34 @@ PhysicsSystem::~PhysicsSystem()
     physicsSystemManager.physicsSystems.removeAll(this);
 }
 
-void PhysicsSystem::componentComplete()
+void PhysicsSystem::refreshDesignStudioMode()
 {
-    if (!m_physicsInitialized)
-        initPhysics();
+    if (m_inDesignStudio)
+        return;
 
-    if (m_running) {
-        m_frameTimer.start();
-        m_frameTimerStarted = true;
-        m_frameAnimator->start();
+    if (!qEnvironmentVariableIsEmpty("QML_PUPPET_MODE")
+        || !qEnvironmentVariableIsEmpty("QMLPUPPET_PROJECT_ROOT")) {
+        m_inDesignStudio = true;
+        return;
     }
 
-    m_time = 0;
+    if (auto *engine = qmlEngine(this))
+        m_inDesignStudio = QQmlEnginePrivate::get(engine)->designerMode();
+}
 
-    emit timeChanged(m_time);
+void PhysicsSystem::componentComplete()
+{
+    refreshDesignStudioMode();
+
+    if ((!m_running && !m_inDesignStudio) || m_physicsInitialized)
+        return;
+
+    initPhysics();
 
     matchOrphanPhysicsNodes();
+
+    if (m_forceDebugDraw)
+        updateDebugDraw();
 }
 
 PhysicsSystem *PhysicsSystem::getPhysicsSystem(QQuick3DNode *node)
@@ -143,6 +173,12 @@ void PhysicsSystem::registerPhysicsNode(AbstractPhysicsNode *physicsNode)
 
 void PhysicsSystem::deregisterPhysicsNode(AbstractPhysicsNode *physicsNode)
 {
+    physicsNode->m_removed = true;
+    physicsNode->m_joltObjectDirty = false;
+    physicsNode->m_jolt = nullptr;
+    physicsNode->m_bodyInterface = nullptr;
+    physicsNode->m_tempAllocator = nullptr;
+
     for (auto *physicsSystem : std::as_const(physicsSystemManager.physicsSystems))
         physicsSystem->m_physicsNodes.removeAll(physicsNode);
     physicsSystemManager.orphanPhysicsNodes.removeAll(physicsNode);
@@ -164,34 +200,6 @@ void PhysicsSystem::removeFromCharacterVsCharacterCollision(CharacterVirtual *ch
 {
     for (auto *physicsSystem : std::as_const(physicsSystemManager.physicsSystems))
         physicsSystem->m_characterVsCharacterCollision.Remove(character->m_character);
-}
-
-int PhysicsSystem::startTime() const
-{
-    return m_startTime;
-}
-
-void PhysicsSystem::setStartTime(int startTime)
-{
-    if (m_startTime == startTime)
-        return;
-
-    m_startTime = startTime;
-    emit startTimeChanged(m_startTime);
-}
-
-int PhysicsSystem::time() const
-{
-    return m_time;
-}
-
-void PhysicsSystem::setTime(int time)
-{
-    if (m_time == time)
-        return;
-
-    m_time = time;
-    emit timeChanged(m_time);
 }
 
 PhysicsSettings *PhysicsSystem::settings() const
@@ -250,7 +258,11 @@ void PhysicsSystem::setRunning(bool running)
 {
     if (m_running == running)
         return;
+
     m_running = running;
+    if (!m_inDesignStudio && m_running && !m_physicsInitialized)
+        initPhysics();
+
     if (m_running) {
         m_frameTimer.start();
         m_frameTimerStarted = true;
@@ -581,7 +593,118 @@ void PhysicsSystem::setScene(QQuick3DNode *scene)
             findPhysicsNodes();
     }
 
+    destroyDebugModel();
+    if (m_forceDebugDraw)
+        updateDebugDraw();
+
     emit sceneChanged(m_scene);
+}
+
+QQuick3DNode *PhysicsSystem::viewport() const
+{
+    return m_viewport;
+}
+
+void PhysicsSystem::setViewport(QQuick3DNode *viewport)
+{
+    if (m_viewport == viewport)
+        return;
+
+    m_viewport = viewport;
+    destroyDebugModel();
+
+    if (m_forceDebugDraw)
+        updateDebugDraw();
+
+    emit viewportChanged(m_viewport);
+}
+
+bool PhysicsSystem::forceDebugDraw() const
+{
+    return m_forceDebugDraw;
+}
+
+void PhysicsSystem::setForceDebugDraw(bool forceDebugDraw)
+{
+    if (m_forceDebugDraw == forceDebugDraw)
+        return;
+
+    m_forceDebugDraw = forceDebugDraw;
+    if (!m_forceDebugDraw)
+        disableDebugDraw();
+    else
+        updateDebugDraw();
+    emit forceDebugDrawChanged(m_forceDebugDraw);
+}
+
+void PhysicsSystem::setupDebugModel(QQuick3DNode *sceneNode)
+{
+    if (!m_debugGeometry)
+        m_debugGeometry = new DebugGeometry();
+
+    if (!m_debugMaterial) {
+        m_debugMaterial = new QQuick3DPrincipledMaterial();
+        m_debugMaterial->setParentItem(sceneNode);
+        m_debugMaterial->setParent(sceneNode);
+        m_debugMaterial->setBaseColor(QColorConstants::White);
+        m_debugMaterial->setLighting(QQuick3DPrincipledMaterial::NoLighting);
+        m_debugMaterial->setVertexColorsEnabled(true);
+        m_debugMaterial->setCullMode(QQuick3DMaterial::NoCulling);
+        m_debugMaterial->setLineWidth(3);
+    }
+
+    if (!m_debugModel) {
+        m_debugModel = new QQuick3DModel();
+        m_debugModel->setParentItem(sceneNode);
+        m_debugModel->setParent(sceneNode);
+        m_debugModel->setCastsShadows(false);
+        m_debugModel->setReceivesShadows(false);
+        m_debugModel->setCastsReflections(false);
+        m_debugGeometry->setParent(m_debugModel);
+        m_debugModel->setGeometry(m_debugGeometry);
+
+        QQmlListReference materialsRef(m_debugModel, "materials");
+        materialsRef.append(m_debugMaterial);
+    }
+
+    m_debugModel->setVisible(true);
+}
+
+void PhysicsSystem::disableDebugDraw()
+{
+    if (m_debugModel)
+        m_debugModel->setVisible(false);
+
+    if (m_debugGeometry)
+        m_debugGeometry->updateVertices({});
+}
+
+void PhysicsSystem::destroyDebugModel()
+{
+    if (m_debugGeometry)
+        m_debugGeometry->setParent(nullptr);
+
+    delete m_debugModel;
+    m_debugModel = nullptr;
+    delete m_debugMaterial;
+    m_debugMaterial = nullptr;
+    delete m_debugGeometry;
+    m_debugGeometry = nullptr;
+}
+
+static AbstractPhysicsNode *physicsNodeFromJoltBody(const JPH::Body &joltBody)
+{
+    return reinterpret_cast<AbstractPhysicsNode *>(joltBody.GetUserData());
+}
+
+static AbstractPhysicsBody *physicsBodyFromJoltBody(const JPH::Body &joltBody)
+{
+    return qobject_cast<AbstractPhysicsBody *>(physicsNodeFromJoltBody(joltBody));
+}
+
+static SoftBody *softBodyFromJoltBody(const JPH::Body &joltBody)
+{
+    return qobject_cast<SoftBody *>(physicsNodeFromJoltBody(joltBody));
 }
 
 static RayCastResult castRay_helper(JPH::PhysicsSystem *jolt, const QVector3D &origin, const QVector3D &direction, const JPH::BroadPhaseLayerFilter &broadPhaseLayerFilter, const JPH::ObjectLayerFilter &objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter)
@@ -600,7 +723,9 @@ static RayCastResult castRay_helper(JPH::PhysicsSystem *jolt, const QVector3D &o
     JPH::RayCastResult hit;
     bool hadHit = jolt->GetNarrowPhaseQuery().CastRay(ray, hit, broadPhaseLayerFilter, objectLayerFilter, bf);
 
-    Body *body = nullptr;
+    AbstractPhysicsBody *body = nullptr;
+    SoftBody *softBody = nullptr;
+    bool resolved = false;
     JPH::Vec3 position = ray.GetPointOnRay(hit.mFraction);
     JPH::Vec3 normal;
 
@@ -608,15 +733,18 @@ static RayCastResult castRay_helper(JPH::PhysicsSystem *jolt, const QVector3D &o
         JPH::BodyLockRead lock(jolt->GetBodyLockInterface(), hit.mBodyID);
         if (lock.Succeeded()) {
             const auto &joltBody = lock.GetBody();
-            body = reinterpret_cast<Body *>(joltBody.GetUserData());
+            body = physicsBodyFromJoltBody(joltBody);
+            softBody = softBodyFromJoltBody(joltBody);
             normal = joltBody.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, position);
+            resolved = true;
         }
     }
 
     return RayCastResult(
         body,
-        body != nullptr ? PhysicsUtils::toQtType(position) : QVector3D(),
-        body != nullptr ? PhysicsUtils::toQtType(normal) : QVector3D(),
+        softBody,
+        resolved ? PhysicsUtils::toQtType(position) : QVector3D(),
+        resolved ? PhysicsUtils::toQtType(normal) : QVector3D(),
         hit.mFraction);
 }
 
@@ -661,13 +789,13 @@ static QVector<RayCastResult> collectRay_helper(JPH::PhysicsSystem *jolt, const 
         JPH::BodyLockRead lock(jolt->GetBodyLockInterface(), hit.mBodyID);
         if (lock.Succeeded()) {
             const auto &joltBody = lock.GetBody();
-            Body *body = reinterpret_cast<Body *>(joltBody.GetUserData());
             JPH::Vec3 position = ray.GetPointOnRay(hit.mFraction);
             JPH::Vec3 normal = joltBody.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, position);
             results.push_back(RayCastResult(
-                body,
-                body != nullptr ? PhysicsUtils::toQtType(position) : QVector3D(),
-                body != nullptr ? PhysicsUtils::toQtType(normal) : QVector3D(),
+                physicsBodyFromJoltBody(joltBody),
+                softBodyFromJoltBody(joltBody),
+                PhysicsUtils::toQtType(position),
+                PhysicsUtils::toQtType(normal),
                 hit.mFraction));
         }
     }
@@ -675,7 +803,7 @@ static QVector<RayCastResult> collectRay_helper(JPH::PhysicsSystem *jolt, const 
     return results;
 }
 
-static QVector<Body *> collidePoint_helper(JPH::PhysicsSystem *jolt, const QVector3D &point, const JPH::BroadPhaseLayerFilter &broadPhaseLayerFilter, const JPH::ObjectLayerFilter &objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter)
+static QVector<CollidePointResult> collidePoint_helper(JPH::PhysicsSystem *jolt, const QVector3D &point, const JPH::BroadPhaseLayerFilter &broadPhaseLayerFilter, const JPH::ObjectLayerFilter &objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter)
 {
     JPH::IgnoreMultipleBodiesFilter bf;
     for (const auto &body : std::as_const(bodyFilter)) {
@@ -686,14 +814,14 @@ static QVector<Body *> collidePoint_helper(JPH::PhysicsSystem *jolt, const QVect
     JPH::AllHitCollisionCollector<JPH::CollidePointCollector> collector;
     jolt->GetNarrowPhaseQuery().CollidePoint(PhysicsUtils::toJoltType(point), collector, broadPhaseLayerFilter, objectLayerFilter, bf);
 
-    QVector<Body *> hits;
+    QVector<CollidePointResult> hits;
     for (const auto &hit : collector.mHits) {
         JPH::BodyLockRead lock(jolt->GetBodyLockInterface(), hit.mBodyID);
-        if (lock.Succeeded()) {
-            const auto &joltBody = lock.GetBody();
-            Body *body = reinterpret_cast<Body *>(joltBody.GetUserData());
-            hits.push_back(body);
-        }
+        if (!lock.Succeeded())
+            continue;
+
+        const auto &joltBody = lock.GetBody();
+        hits.push_back(CollidePointResult(physicsBodyFromJoltBody(joltBody), softBodyFromJoltBody(joltBody)));
     }
 
     return hits;
@@ -759,14 +887,14 @@ static QVector<CollideShapeResult> collideShape_helper(JPH::PhysicsSystem *jolt,
         JPH::BodyLockRead lock(jolt->GetBodyLockInterface(), hit.mBodyID2);
         if (lock.Succeeded()) {
             const auto &joltBody = lock.GetBody();
-            Body *body = reinterpret_cast<Body *>(joltBody.GetUserData());
             const auto &surfaceNormal = joltBody.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, hit.mContactPointOn2);
             results.push_back(CollideShapeResult(PhysicsUtils::toQtType(hit.mContactPointOn1),
                                                  PhysicsUtils::toQtType(hit.mContactPointOn2),
                                                  PhysicsUtils::toQtType(hit.mPenetrationAxis),
                                                  hit.mPenetrationDepth,
                                                  PhysicsUtils::toQtType(surfaceNormal),
-                                                 body));
+                                                 physicsBodyFromJoltBody(joltBody),
+                                                 softBodyFromJoltBody(joltBody)));
         }
     }
 
@@ -833,14 +961,14 @@ static QVector<ShapeCastResult> castShape_helper(JPH::PhysicsSystem *jolt, const
         if (lock.Succeeded()) {
             const auto &position = shapeCast.GetPointOnRay(hit.mFraction);
             const auto &joltBody = lock.GetBody();
-            Body *body = reinterpret_cast<Body *>(joltBody.GetUserData());
             const auto &surfaceNormal = joltBody.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, hit.mContactPointOn2);
             results.push_back(ShapeCastResult(PhysicsUtils::toQtType(hit.mContactPointOn1),
                                               PhysicsUtils::toQtType(hit.mContactPointOn2),
                                               PhysicsUtils::toQtType(hit.mPenetrationAxis),
                                               hit.mPenetrationDepth,
                                               PhysicsUtils::toQtType(surfaceNormal),
-                                              body,
+                                              physicsBodyFromJoltBody(joltBody),
+                                              softBodyFromJoltBody(joltBody),
                                               PhysicsUtils::toQtType(position),
                                               hit.mFraction,
                                               hit.mIsBackFaceHit));
@@ -913,7 +1041,7 @@ QVector<RayCastResult> PhysicsSystem::collectRay(const QVector3D &origin, const 
                              maxHits);
 }
 
-QVector<Body *> PhysicsSystem::collidePoint(const QVector3D &point, const QVector<AbstractPhysicsBody *> &bodyFilter) const
+QVector<CollidePointResult> PhysicsSystem::collidePoint(const QVector3D &point, const QVector<AbstractPhysicsBody *> &bodyFilter) const
 {
     return collidePoint_helper(m_jolt,
                                point,
@@ -922,7 +1050,7 @@ QVector<Body *> PhysicsSystem::collidePoint(const QVector3D &point, const QVecto
                                bodyFilter);
 }
 
-QVector<Body *> PhysicsSystem::collidePoint(const QVector3D &point, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const
+QVector<CollidePointResult> PhysicsSystem::collidePoint(const QVector3D &point, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const
 {
     return collidePoint_helper(m_jolt,
                                point,
@@ -931,7 +1059,7 @@ QVector<Body *> PhysicsSystem::collidePoint(const QVector3D &point, quint32 obje
                                bodyFilter);
 }
 
-QVector<Body *> PhysicsSystem::collidePoint(const QVector3D &point, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const
+QVector<CollidePointResult> PhysicsSystem::collidePoint(const QVector3D &point, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const
 {
     return collidePoint_helper(m_jolt,
                                point,
@@ -1037,11 +1165,13 @@ static QVector<TriangleResult> getTriangles_helper(JPH::PhysicsSystem *jolt, con
         JPH::Float3 vertices[maxTriangles * 3];
         JPH::Shape::GetTrianglesContext ctx;
 
-        Body *qtBody = nullptr;
+        AbstractPhysicsBody *qtBody = nullptr;
+        SoftBody *qtSoftBody = nullptr;
         JPH::BodyLockRead bodyLock(jolt->GetBodyLockInterface(), JPH::BodyID(ts.mBodyID));
         if (bodyLock.Succeeded()) {
-            const JPH::Body &body = bodyLock.GetBody();
-            qtBody = reinterpret_cast<Body *>(body.GetUserData());
+            const auto &joltBody = bodyLock.GetBody();
+            qtBody = physicsBodyFromJoltBody(joltBody);
+            qtSoftBody = softBodyFromJoltBody(joltBody);
         }
 
         ts.GetTrianglesStart(ctx, box, PhysicsUtils::toJoltType(baseOffset));
@@ -1058,7 +1188,8 @@ static QVector<TriangleResult> getTriangles_helper(JPH::PhysicsSystem *jolt, con
                     baseOffset + QVector3D(v0.x, v0.y, v0.z),
                     baseOffset + QVector3D(v1.x, v1.y, v1.z),
                     baseOffset + QVector3D(v2.x, v2.y, v2.z),
-                    qtBody));
+                    qtBody,
+                    qtSoftBody));
             }
         }
     }
@@ -1141,6 +1272,8 @@ void PhysicsSystem::initPhysics()
     m_jolt->SetGravity(PhysicsUtils::toJoltType(m_gravity));
 
     m_physicsInitialized = true;
+
+    m_frameAnimator->start();
 }
 
 void PhysicsSystem::matchOrphanPhysicsNodes()
@@ -1187,6 +1320,11 @@ void PhysicsSystem::findPhysicsNodes()
 
 void PhysicsSystem::simulateFrame()
 {
+    if (m_inDesignStudio) {
+        frameFinishedDesignStudio();
+        return;
+    }
+
     if (!m_frameTimerStarted) {
         m_frameTimer.start();
         m_frameTimerStarted = true;
@@ -1216,6 +1354,9 @@ void PhysicsSystem::simulateFrame()
 
     emit beforeFrameDone(step);
 
+    for (auto physicsNode : std::as_const(m_physicsNodes))
+        physicsNode->rebuildJoltObjectIfDirty();
+
     QHash<QQuick3DNode *, QMatrix4x4> transformCache;
 
     for (auto physicsNode : std::as_const(m_physicsNodes))
@@ -1226,7 +1367,46 @@ void PhysicsSystem::simulateFrame()
     for (auto physicsNode : std::as_const(m_physicsNodes))
         physicsNode->sync();
 
+    updateDebugDraw();
+
     emit frameDone(step);
+}
+
+void PhysicsSystem::frameFinishedDesignStudio()
+{
+    matchOrphanPhysicsNodes();
+    emitContactCallbacks();
+
+    for (auto physicsNode : std::as_const(m_physicsNodes))
+        physicsNode->rebuildJoltObjectIfDirty();
+
+    updateDebugDraw();
+}
+
+void PhysicsSystem::updateDebugDraw()
+{
+    if (!m_forceDebugDraw || !m_jolt) {
+        disableDebugDraw();
+        return;
+    }
+
+    QQuick3DNode *sceneNode = m_viewport ? m_viewport : m_scene;
+    if (!sceneNode) {
+        disableDebugDraw();
+        return;
+    }
+
+    setupDebugModel(sceneNode);
+
+    m_debugRenderer->clear();
+
+    JPH::BodyManager::DrawSettings drawSettings;
+    drawSettings.mDrawShape = true;
+    drawSettings.mDrawShapeWireframe = true;
+
+    m_jolt->DrawBodies(drawSettings, m_debugRenderer.get());
+
+    m_debugGeometry->updateVertices(m_debugRenderer->vertices());
 }
 
 void PhysicsSystem::emitContactCallbacks()
@@ -1235,21 +1415,19 @@ void PhysicsSystem::emitContactCallbacks()
         return;
 
     for (const auto &bodyContact : std::as_const(m_contactListener->m_bodyContacts)) {
-        Body *qtBody1 = nullptr;
+        AbstractPhysicsBody *qtBody1 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID1));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody1 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody1 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 
-        Body *qtBody2 = nullptr;
+        AbstractPhysicsBody *qtBody2 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID2));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody2 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody2 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 
@@ -1260,21 +1438,19 @@ void PhysicsSystem::emitContactCallbacks()
     }
 
     for (const auto &bodyContact : std::as_const(m_contactListener->m_enteredBodyContacts)) {
-        Body *qtBody1 = nullptr;
+        AbstractPhysicsBody *qtBody1 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID1));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody1 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody1 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 
-        Body *qtBody2 = nullptr;
+        AbstractPhysicsBody *qtBody2 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID2));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody2 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody2 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 
@@ -1285,21 +1461,19 @@ void PhysicsSystem::emitContactCallbacks()
     }
 
     for (const auto &bodyContact : std::as_const(m_contactListener->m_exitedBodyContacts)) {
-        Body *qtBody1 = nullptr;
+        AbstractPhysicsBody *qtBody1 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID1));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody1 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody1 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 
-        Body *qtBody2 = nullptr;
+        AbstractPhysicsBody *qtBody2 = nullptr;
         {
             JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(bodyContact.bodyID2));
             if (bodyLock.Succeeded()) {
-                const JPH::Body &body = bodyLock.GetBody();
-                qtBody2 = reinterpret_cast<Body *>(body.GetUserData());
+                qtBody2 = physicsBodyFromJoltBody(bodyLock.GetBody());
             }
         }
 

@@ -108,7 +108,7 @@ AbstractPhysicsBody *AbstractPhysicsCharacter::getGroundBody() const
     JPH::BodyLockRead bodyLock(m_jolt->GetBodyLockInterface(), JPH::BodyID(character()->GetGroundBodyID()));
     if (bodyLock.Succeeded()) {
         const JPH::Body &body = bodyLock.GetBody();
-        return reinterpret_cast<Body *>(body.GetUserData());
+        return qobject_cast<AbstractPhysicsBody *>(reinterpret_cast<AbstractPhysicsNode *>(body.GetUserData()));
     }
 
     return nullptr;

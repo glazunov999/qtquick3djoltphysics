@@ -32,12 +32,12 @@ signals:
     void changed();
 
 private:
+    void createJoltGroupFilterTable();
     JPH::Ref<JPH::GroupFilterTable> getJoltGroupFilterTable() const;
     friend class CollisionGroup;
 
     quint32 m_numSubGroups = 0;
     JPH::Ref<JPH::GroupFilterTable> m_groupFilterTable = nullptr;
-    bool m_componentComplete = false;
 };
 
 #endif // GROUPFILTERTABLE_P_H

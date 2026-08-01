@@ -2,14 +2,13 @@
 
 GroupFilterTable::GroupFilterTable(QObject *parent) : QObject(parent)
 {
-    m_groupFilterTable = new JPH::GroupFilterTable();
 }
 
 GroupFilterTable::~GroupFilterTable() = default;
 
 void GroupFilterTable::componentComplete()
 {
-    m_componentComplete = true;
+    createJoltGroupFilterTable();
 }
 
 quint32 GroupFilterTable::numSubGroups() const
@@ -23,7 +22,10 @@ void GroupFilterTable::setNumSubGroups(quint32 numSubGroups)
         return;
 
     m_numSubGroups = numSubGroups;
-    m_groupFilterTable = new JPH::GroupFilterTable(m_numSubGroups);
+    if (m_groupFilterTable) {
+        m_groupFilterTable = nullptr;
+        createJoltGroupFilterTable();
+    }
 
     emit numSubGroupsChanged(m_numSubGroups);
     emit changed();
@@ -31,7 +33,7 @@ void GroupFilterTable::setNumSubGroups(quint32 numSubGroups)
 
 void GroupFilterTable::disableCollision(quint32 subGroup1, quint32 subGroup2)
 {
-    if (!m_componentComplete) {
+    if (!m_groupFilterTable) {
         qWarning() << "Warning: calling 'disableCollision' before GroupFilterTable is complete will have "
                       "no effect";
         return;
@@ -42,13 +44,21 @@ void GroupFilterTable::disableCollision(quint32 subGroup1, quint32 subGroup2)
 
 void GroupFilterTable::enableCollision(quint32 subGroup1, quint32 subGroup2)
 {
-    if (!m_componentComplete) {
+    if (!m_groupFilterTable) {
         qWarning() << "Warning: calling 'enableCollision' before GroupFilterTable is complete will have "
                       "no effect";
         return;
     }
 
     m_groupFilterTable->EnableCollision(subGroup1, subGroup2);
+}
+
+void GroupFilterTable::createJoltGroupFilterTable()
+{
+    if (m_groupFilterTable)
+        return;
+
+    m_groupFilterTable = new JPH::GroupFilterTable(m_numSubGroups);
 }
 
 JPH::Ref<JPH::GroupFilterTable> GroupFilterTable::getJoltGroupFilterTable() const

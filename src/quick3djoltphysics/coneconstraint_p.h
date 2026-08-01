@@ -12,7 +12,7 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT ConeConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT ConeConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
@@ -20,16 +20,15 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT ConeConstraint : public AbstractTwoBodyPhysics
     Q_PROPERTY(QVector3D twistAxis1 READ twistAxis1 WRITE setTwistAxis1 NOTIFY twistAxis1Changed)
     Q_PROPERTY(QVector3D twistAxis2 READ twistAxis2 WRITE setTwistAxis2 NOTIFY twistAxis2Changed)
     Q_PROPERTY(float halfConeAngle READ halfConeAngle WRITE setHalfConeAngle NOTIFY halfConeAngleChanged)
-    QML_NAMED_ELEMENT(ConeConstraint)
+    QML_NAMED_ELEMENT(ConeConstraintSettings)
 public:
-    explicit ConeConstraint(QQuick3DNode *parent = nullptr);
-    ~ConeConstraint() override;
+    explicit ConeConstraintSettings(QObject *parent = nullptr);
 
     QVector3D point1() const;
-    void setPoint1(const QVector3D &point);
+    void setPoint1(const QVector3D &point1);
 
     QVector3D point2() const;
-    void setPoint2(const QVector3D &point);
+    void setPoint2(const QVector3D &point2);
 
     QVector3D twistAxis1() const;
     void setTwistAxis1(const QVector3D &twistAxis1);
@@ -40,15 +39,16 @@ public:
     float halfConeAngle() const;
     void setHalfConeAngle(float halfConeAngle);
 
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
 signals:
-    void point1Changed(const QVector3D &point);
-    void point2Changed(const QVector3D &point);
+    void point1Changed(const QVector3D &point1);
+    void point2Changed(const QVector3D &point2);
     void twistAxis1Changed(const QVector3D &twistAxis1);
     void twistAxis2Changed(const QVector3D &twistAxis2);
     void halfConeAngleChanged(float halfConeAngle);
-
-protected:
-    void updateJoltObject() override;
 
 private:
     QVector3D m_point1;
@@ -56,7 +56,28 @@ private:
     QVector3D m_twistAxis1 = QVector3D(1, 0, 0);
     QVector3D m_twistAxis2 = QVector3D(1, 0, 0);
     float m_halfConeAngle = 0.0f;
-    JPH::ConeConstraintSettings m_constraintSettings;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT ConeConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(ConeConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(ConeConstraint)
+public:
+    explicit ConeConstraint(QQuick3DNode *parent = nullptr);
+    ~ConeConstraint() override;
+
+    ConeConstraintSettings *settings() const;
+    void setSettings(ConeConstraintSettings *settings);
+
+signals:
+    void settingsChanged(ConeConstraintSettings *settings);
+
+protected:
+    void updateJoltObject() override;
+
+private:
+    ConeConstraintSettings *m_settings = nullptr;
 };
 
 #endif // CONECONSTRAINT_P_H

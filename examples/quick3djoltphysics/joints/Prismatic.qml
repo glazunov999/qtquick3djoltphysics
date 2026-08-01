@@ -51,6 +51,7 @@ Node {
         }
         objectLayer: moving
         motionType: Body.Dynamic
+        allowSleeping: false
         collisionGroup: CollisionGroup {
             groupFilterTable: pairFilter
             groupId: 1
@@ -68,15 +69,15 @@ Node {
     SliderConstraint {
         body1: prismaticBoxA
         body2: prismaticBoxB
-        space: SliderConstraint.LocalToBodyCOM
-        autoDetectPoint: false
-        point1: Qt.vector3d(halfX, 0, 0)
-        point2: Qt.vector3d(-halfX, 0, 0)
-        sliderAxis1: Qt.vector3d(1, 0, 0)
-        sliderAxis2: Qt.vector3d(1, 0, 0)
-        normalAxis1: Qt.vector3d(0, 1, 0)
-        normalAxis2: Qt.vector3d(0, 1, 0)
-        limitsMin: -200
-        limitsMax: 0
+        settings.space: PhysicsTwoBodyConstraintSettings.LocalToBodyCOM
+        settings.autoDetectPoint: false
+        settings.point1: Qt.vector3d(halfX, 0, 0)
+        settings.point2: Qt.vector3d(-halfX, 0, 0)
+        settings.sliderAxis1: Qt.vector3d(1, 0, 0)
+        settings.sliderAxis2: Qt.vector3d(1, 0, 0)
+        settings.normalAxis1: Qt.vector3d(0, 1, 0)
+        settings.normalAxis2: Qt.vector3d(0, 1, 0)
+        settings.limitsMin: -200
+        settings.limitsMax: 0
     }
 }

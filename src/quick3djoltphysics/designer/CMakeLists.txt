@@ -1,0 +1,86 @@
+#####################################################################
+## QtQuick3D.JoltPhysics designer support:
+#####################################################################
+
+qt_path_join(destination ${QT_INSTALL_DIR} "${INSTALL_QMLDIR}/QtQuick3D/JoltPhysics/designer")
+qt_copy_or_install(
+    FILES
+        BodySection.qml
+        BodySpecifics.qml
+        BoxShapeSection.qml
+        BoxShapeSpecifics.qml
+        CapsuleShapeSection.qml
+        CapsuleShapeSpecifics.qml
+        CharacterSection.qml
+        CharacterSpecifics.qml
+        CharacterVirtualSection.qml
+        CharacterVirtualSpecifics.qml
+        CollisionGroupSection.qml
+        CollisionGroupSpecifics.qml
+        ConeConstraintSection.qml
+        ConeConstraintSpecifics.qml
+        ConstraintSection.qml
+        ConvexHullShapeSection.qml
+        ConvexHullShapeSpecifics.qml
+        CylinderShapeSection.qml
+        CylinderShapeSpecifics.qml
+        DistanceConstraintSection.qml
+        DistanceConstraintSpecifics.qml
+        EmptyShapeSection.qml
+        EmptyShapeSpecifics.qml
+        FixedConstraintSection.qml
+        FixedConstraintSpecifics.qml
+        GearConstraintSection.qml
+        GearConstraintSpecifics.qml
+        GroupFilterTableSection.qml
+        GroupFilterTableSpecifics.qml
+        HeightFieldShapeSection.qml
+        HeightFieldShapeSpecifics.qml
+        HingeConstraintSection.qml
+        HingeConstraintSpecifics.qml
+        joltphysics.metainfo
+        MeshShapeSection.qml
+        MeshShapeSpecifics.qml
+        MutableCompoundShapeSection.qml
+        MutableCompoundShapeSpecifics.qml
+        NodeSection.qml
+        PathConstraintSection.qml
+        PathConstraintSpecifics.qml
+        PhysicsBodySection.qml
+        PhysicsCharacterSection.qml
+        PhysicsNodeSection.qml
+        PhysicsSettingsSection.qml
+        PhysicsSettingsSpecifics.qml
+        PhysicsSystemSection.qml
+        PhysicsSystemSpecifics.qml
+        PlaneShapeSection.qml
+        PlaneShapeSpecifics.qml
+        PointConstraintSection.qml
+        PointConstraintSpecifics.qml
+        PulleyConstraintSection.qml
+        PulleyConstraintSpecifics.qml
+        RackAndPinionConstraintSection.qml
+        RackAndPinionConstraintSpecifics.qml
+        RagdollSection.qml
+        RagdollSpecifics.qml
+        RotatedTranslatedShapeSection.qml
+        RotatedTranslatedShapeSpecifics.qml
+        ShapeSection.qml
+        SliderConstraintSection.qml
+        SliderConstraintSpecifics.qml
+        SoftBodySection.qml
+        SoftBodySpecifics.qml
+        SphereShapeSection.qml
+        SphereShapeSpecifics.qml
+        StaticCompoundShapeSection.qml
+        StaticCompoundShapeSpecifics.qml
+        SwingTwistConstraintSection.qml
+        SwingTwistConstraintSpecifics.qml
+        TaperedCapsuleShapeSection.qml
+        TaperedCapsuleShapeSpecifics.qml
+        TaperedCylinderShapeSection.qml
+        TaperedCylinderShapeSpecifics.qml
+    DESTINATION "${destination}"
+)
+
+add_subdirectory(images)

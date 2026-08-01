@@ -15,7 +15,7 @@ Item {
     readonly property int moving: 1
 
     // Jolt Samples/Tests/SoftBody/SoftBodyForceTest
-    readonly property real maxForce: 15
+    readonly property real maxForce: 10000
 
     property real forceTime: 0
 

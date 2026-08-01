@@ -553,5 +553,5 @@ void MeshShape::createJoltShape()
         return;
     
     m_joltShape = shapeResult.Get();
-    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(sceneScale()));
+    m_joltShape = new JPH::ScaledShape(m_joltShape, PhysicsUtils::toJoltType(physicsScale()));
 }

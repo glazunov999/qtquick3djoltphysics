@@ -2,3 +2,6 @@ build
 *.pro.user
 *.txt.user
 ~*
+build-ds
+build-test
+.cursor

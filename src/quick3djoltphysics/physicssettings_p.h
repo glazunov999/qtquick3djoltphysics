@@ -18,7 +18,7 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT PhysicsSettings : public QObject
     Q_PROPERTY(float penetrationSlop READ penetrationSlop WRITE setPenetrationSlop NOTIFY penetrationSlopChanged)
     Q_PROPERTY(float linearCastThreshold READ linearCastThreshold WRITE setLinearCastThreshold NOTIFY linearCastThresholdChanged)
     Q_PROPERTY(float linearCastMaxPenetration READ linearCastMaxPenetration WRITE setLinearCastMaxPenetration NOTIFY linearCastMaxPenetrationChanged)
-    Q_PROPERTY(float manifoldToleranceSq READ manifoldToleranceSq WRITE setManifoldToleranceSq NOTIFY manifoldToleranceSqChanged)
+    Q_PROPERTY(float manifoldTolerance READ manifoldTolerance WRITE setManifoldTolerance NOTIFY manifoldToleranceChanged)
     Q_PROPERTY(float maxPenetrationDistance READ maxPenetrationDistance WRITE setMaxPenetrationDistance NOTIFY maxPenetrationDistanceChanged)
     Q_PROPERTY(float bodyPairCacheMaxDeltaPositionSq READ bodyPairCacheMaxDeltaPositionSq WRITE setBodyPairCacheMaxDeltaPositionSq NOTIFY bodyPairCacheMaxDeltaPositionSqChanged)
     Q_PROPERTY(float bodyPairCacheCosMaxDeltaRotationDiv2 READ bodyPairCacheCosMaxDeltaRotationDiv2 WRITE setBodyPairCacheCosMaxDeltaRotationDiv2 NOTIFY bodyPairCacheCosMaxDeltaRotationDiv2Changed)
@@ -64,8 +64,8 @@ public:
     float linearCastMaxPenetration() const;
     void setLinearCastMaxPenetration(float linearCastMaxPenetration);
 
-    float manifoldToleranceSq() const;
-    void setManifoldToleranceSq(float manifoldToleranceSq);
+    float manifoldTolerance() const;
+    void setManifoldTolerance(float manifoldTolerance);
 
     float maxPenetrationDistance() const;
     void setMaxPenetrationDistance(float maxPenetrationDistance);
@@ -127,7 +127,7 @@ signals:
     void penetrationSlopChanged(float penetrationSlop);
     void linearCastThresholdChanged(float linearCastThreshold);
     void linearCastMaxPenetrationChanged(float linearCastMaxPenetration);
-    void manifoldToleranceSqChanged(float manifoldToleranceSq);
+    void manifoldToleranceChanged(float manifoldTolerance);
     void maxPenetrationDistanceChanged(float maxPenetrationDistance);
     void bodyPairCacheMaxDeltaPositionSqChanged(float bodyPairCacheMaxDeltaPositionSq);
     void bodyPairCacheCosMaxDeltaRotationDiv2Changed(float bodyPairCacheCosMaxDeltaRotationDiv2);

@@ -9,8 +9,6 @@
 
 RotatedTranslatedShape::RotatedTranslatedShape(QQuick3DNode *parent) : AbstractShape(parent)
 {
-    connect(this, &QQuick3DNode::scenePositionChanged, this, [this] { handleShapeChange(); });
-    connect(this, &QQuick3DNode::sceneRotationChanged, this, [this] { handleShapeChange(); });
 }
 
 RotatedTranslatedShape::~RotatedTranslatedShape() = default;

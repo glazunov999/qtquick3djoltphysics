@@ -5,70 +5,117 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-GearConstraint::GearConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
+GearConstraintSettings::GearConstraintSettings(QObject *parent)
+    : AbstractTwoBodyPhysicsConstraintSettings(parent)
 {
 }
 
-GearConstraint::~GearConstraint() = default;
-
-QVector3D GearConstraint::hingeAxis1() const
+QVector3D GearConstraintSettings::hingeAxis1() const
 {
     return m_hingeAxis1;
 }
 
-void GearConstraint::setHingeAxis1(const QVector3D &hingeAxis1)
+void GearConstraintSettings::setHingeAxis1(const QVector3D &hingeAxis1)
 {
     if (m_hingeAxis1 == hingeAxis1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'hingeAxis1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_hingeAxis1 = hingeAxis1;
     emit hingeAxis1Changed(m_hingeAxis1);
+    emit changed();
 }
 
-QVector3D GearConstraint::hingeAxis2() const
+QVector3D GearConstraintSettings::hingeAxis2() const
 {
     return m_hingeAxis2;
 }
 
-void GearConstraint::setHingeAxis2(const QVector3D &hingeAxis2)
+void GearConstraintSettings::setHingeAxis2(const QVector3D &hingeAxis2)
 {
     if (m_hingeAxis2 == hingeAxis2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'hingeAxis2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_hingeAxis2 = hingeAxis2;
     emit hingeAxis2Changed(m_hingeAxis2);
+    emit changed();
 }
 
-float GearConstraint::ratio() const
+float GearConstraintSettings::ratio() const
 {
     return m_ratio;
 }
 
-void GearConstraint::setRatio(float ratio)
+void GearConstraintSettings::setRatio(float ratio)
 {
     if (qFuzzyCompare(m_ratio, ratio))
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'ratio' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_ratio = ratio;
     emit ratioChanged(m_ratio);
+    emit changed();
+}
+
+JPH::Ref<JPH::TwoBodyConstraintSettings> GearConstraintSettings::createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame) const
+{
+    auto *settings = new JPH::GearConstraintSettings;
+    applyBaseSettings(*settings);
+    settings->mSpace = static_cast<JPH::EConstraintSpace>(m_space);
+    settings->mHingeAxis1 = PhysicsUtils::toJoltType(m_hingeAxis1);
+    settings->mHingeAxis2 = PhysicsUtils::toJoltType(m_hingeAxis2);
+    settings->mRatio = m_ratio;
+    mapToWorld(settings, localFrame);
+    return settings;
+}
+
+void GearConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                        const QQuick3DNode *localFrame) const
+{
+    if (settings == nullptr || !canMapToWorld(localFrame))
+        return;
+
+    auto *gear = JPH::DynamicCast<JPH::GearConstraintSettings>(settings);
+    if (gear == nullptr)
+        return;
+
+    const QQuaternion rotation = localFrame->sceneRotation();
+    mapDirectionToWorld(gear->mHingeAxis1, rotation);
+    mapDirectionToWorld(gear->mHingeAxis2, rotation);
+}
+
+GearConstraint::GearConstraint(QQuick3DNode *parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
+{
+    setSettings(new GearConstraintSettings(this));
+}
+
+GearConstraint::~GearConstraint() = default;
+
+GearConstraintSettings *GearConstraint::settings() const
+{
+    return m_settings;
+}
+
+void GearConstraint::setSettings(GearConstraintSettings *settings)
+{
+    if (m_settings == settings)
+        return;
+
+    if (m_settings != nullptr)
+        m_settings->disconnect(this);
+
+    m_settings = settings;
+
+    if (m_settings != nullptr) {
+        QObject::connect(m_settings, &AbstractPhysicsConstraintSettings::changed, this,
+                         [this] { updateJoltObject(); });
+        QObject::connect(m_settings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_settings == obj)
+                setSettings(nullptr);
+        });
+    }
+
+    updateJoltObject();
+    emit settingsChanged(m_settings);
 }
 
 HingeConstraint *GearConstraint::gear1Constraint() const
@@ -160,18 +207,15 @@ void GearConstraint::linkGearConstraints()
 
 void GearConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || !joltBodiesReady())
+    if (m_jolt == nullptr || !joltBodiesReady() || m_settings == nullptr)
         return;
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
-    m_constraintSettings.mHingeAxis1 = PhysicsUtils::toJoltType(m_hingeAxis1);
-    m_constraintSettings.mHingeAxis2 = PhysicsUtils::toJoltType(m_hingeAxis2);
-    m_constraintSettings.mRatio = m_ratio;
-
-    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
+    const JPH::Ref<JPH::TwoBodyConstraintSettings> settings =
+            m_settings->createJoltTwoBodyConstraintSettings();
+    m_constraint = settings->Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
     linkGearConstraints();
 }

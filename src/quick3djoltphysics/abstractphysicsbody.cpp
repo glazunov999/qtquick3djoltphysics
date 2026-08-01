@@ -39,23 +39,9 @@ void AbstractPhysicsBody::setShape(AbstractShape *shape)
         if (m_shape->parentItem() == nullptr)
             m_shape->setParentItem(this);
         m_shapeSignalConnection = QObject::connect(m_shape, &AbstractShape::changed, this,
-                                                   [this] { updateJoltObject(); });
+                                                   [this] { markJoltObjectDirty(); });
     }
 
-    updateJoltObject();
+    markJoltObjectDirty();
     emit shapeChanged(m_shape);
-}
-
-AbstractPhysicsBody::Activation AbstractPhysicsBody::activation() const
-{
-    return m_activation;
-}
-
-void AbstractPhysicsBody::setActivation(Activation activation)
-{
-    if (m_activation == activation)
-        return;
-
-    m_activation = activation;
-    emit activationChanged(activation);
 }

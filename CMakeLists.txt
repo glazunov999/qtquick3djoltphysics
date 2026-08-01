@@ -16,4 +16,8 @@ find_package(Qt6 ${PROJECT_VERSION} CONFIG OPTIONAL_COMPONENTS Gui Qml Quick Qui
 
 qt_internal_project_setup()
 
+if(EMSCRIPTEN)
+    add_link_options(-msimd128)
+endif()
+
 qt_build_repo()

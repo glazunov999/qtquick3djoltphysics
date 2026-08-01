@@ -5,290 +5,262 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-namespace {
-
-bool sanitizeSliderLimits(float &limitsMin, float &limitsMax)
-{
-    bool changed = false;
-    if (limitsMin > 0.0f) {
-        qWarning() << "SliderConstraint: limitsMin must be <= 0 (Jolt: position 0 at anchor); clamping"
-                   << limitsMin << "to 0";
-        limitsMin = 0.0f;
-        changed = true;
-    }
-    if (limitsMax < 0.0f) {
-        qWarning() << "SliderConstraint: limitsMax must be >= 0; clamping" << limitsMax << "to 0";
-        limitsMax = 0.0f;
-        changed = true;
-    }
-    if (limitsMin > limitsMax) {
-        qWarning() << "SliderConstraint: limitsMin must be <= limitsMax; swapping" << limitsMin
-                   << "and" << limitsMax;
-        const float tmp = limitsMin;
-        limitsMin = limitsMax;
-        limitsMax = tmp;
-        changed = true;
-    }
-    return changed;
-}
-
-} // namespace
-
-SliderConstraint::SliderConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
+SliderConstraintSettings::SliderConstraintSettings(QObject *parent)
+    : AbstractTwoBodyPhysicsConstraintSettings(parent)
 {
 }
 
-SliderConstraint::~SliderConstraint() = default;
-
-QVector3D SliderConstraint::point1() const
+QVector3D SliderConstraintSettings::point1() const
 {
     return m_point1;
 }
 
-void SliderConstraint::setPoint1(const QVector3D &point)
+void SliderConstraintSettings::setPoint1(const QVector3D &point1)
 {
-    if (m_point1 == point)
+    if (m_point1 == point1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'point1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_point1 = point;
+    m_point1 = point1;
     emit point1Changed(m_point1);
+    emit changed();
 }
 
-QVector3D SliderConstraint::point2() const
+QVector3D SliderConstraintSettings::point2() const
 {
     return m_point2;
 }
 
-void SliderConstraint::setPoint2(const QVector3D &point)
+void SliderConstraintSettings::setPoint2(const QVector3D &point2)
 {
-    if (m_point2 == point)
+    if (m_point2 == point2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'point2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_point2 = point;
+    m_point2 = point2;
     emit point2Changed(m_point2);
+    emit changed();
 }
 
-bool SliderConstraint::autoDetectPoint() const
+bool SliderConstraintSettings::autoDetectPoint() const
 {
     return m_autoDetectPoint;
 }
 
-void SliderConstraint::setAutoDetectPoint(bool autoDetectPoint)
+void SliderConstraintSettings::setAutoDetectPoint(bool autoDetectPoint)
 {
     if (m_autoDetectPoint == autoDetectPoint)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'autoDetectPoint' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_autoDetectPoint = autoDetectPoint;
     emit autoDetectPointChanged(m_autoDetectPoint);
+    emit changed();
 }
 
-QVector3D SliderConstraint::sliderAxis1() const
+QVector3D SliderConstraintSettings::sliderAxis1() const
 {
     return m_sliderAxis1;
 }
 
-void SliderConstraint::setSliderAxis1(const QVector3D &sliderAxis1)
+void SliderConstraintSettings::setSliderAxis1(const QVector3D &sliderAxis1)
 {
     if (m_sliderAxis1 == sliderAxis1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'sliderAxis1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_sliderAxis1 = sliderAxis1;
     emit sliderAxis1Changed(m_sliderAxis1);
+    emit changed();
 }
 
-QVector3D SliderConstraint::sliderAxis2() const
+QVector3D SliderConstraintSettings::sliderAxis2() const
 {
     return m_sliderAxis2;
 }
 
-void SliderConstraint::setSliderAxis2(const QVector3D &sliderAxis2)
+void SliderConstraintSettings::setSliderAxis2(const QVector3D &sliderAxis2)
 {
     if (m_sliderAxis2 == sliderAxis2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'sliderAxis2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_sliderAxis2 = sliderAxis2;
     emit sliderAxis2Changed(m_sliderAxis2);
+    emit changed();
 }
 
-QVector3D SliderConstraint::normalAxis1() const
+QVector3D SliderConstraintSettings::normalAxis1() const
 {
     return m_normalAxis1;
 }
 
-void SliderConstraint::setNormalAxis1(const QVector3D &normalAxis1)
+void SliderConstraintSettings::setNormalAxis1(const QVector3D &normalAxis1)
 {
     if (m_normalAxis1 == normalAxis1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'normalAxis1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_normalAxis1 = normalAxis1;
     emit normalAxis1Changed(m_normalAxis1);
+    emit changed();
 }
 
-QVector3D SliderConstraint::normalAxis2() const
+QVector3D SliderConstraintSettings::normalAxis2() const
 {
     return m_normalAxis2;
 }
 
-void SliderConstraint::setNormalAxis2(const QVector3D &normalAxis2)
+void SliderConstraintSettings::setNormalAxis2(const QVector3D &normalAxis2)
 {
     if (m_normalAxis2 == normalAxis2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'normalAxis2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_normalAxis2 = normalAxis2;
     emit normalAxis2Changed(m_normalAxis2);
+    emit changed();
 }
 
-float SliderConstraint::limitsMin() const
+float SliderConstraintSettings::limitsMin() const
 {
     return m_limitsMin;
 }
 
-void SliderConstraint::setLimitsMin(float limitsMin)
+void SliderConstraintSettings::setLimitsMin(float limitsMin)
 {
-    const float oldMin = m_limitsMin;
-    const float oldMax = m_limitsMax;
-    float min = limitsMin;
-    float max = m_limitsMax;
-    sanitizeSliderLimits(min, max);
-    if (qFuzzyCompare(oldMin, min) && qFuzzyCompare(oldMax, max))
+    if (qFuzzyCompare(m_limitsMin, limitsMin))
         return;
 
-    m_limitsMin = min;
-    m_limitsMax = max;
-    if (m_constraint)
-        static_cast<JPH::SliderConstraint *>(m_constraint)->SetLimits(m_limitsMin, m_limitsMax);
-
-    if (!qFuzzyCompare(oldMin, min))
-        emit limitsMinChanged(m_limitsMin);
-    if (!qFuzzyCompare(oldMax, max))
-        emit limitsMaxChanged(m_limitsMax);
+    m_limitsMin = limitsMin;
+    emit limitsMinChanged(m_limitsMin);
+    emit changed();
 }
 
-float SliderConstraint::limitsMax() const
+float SliderConstraintSettings::limitsMax() const
 {
     return m_limitsMax;
 }
 
-void SliderConstraint::setLimitsMax(float limitsMax)
+void SliderConstraintSettings::setLimitsMax(float limitsMax)
 {
-    const float oldMin = m_limitsMin;
-    const float oldMax = m_limitsMax;
-    float min = m_limitsMin;
-    float max = limitsMax;
-    sanitizeSliderLimits(min, max);
-    if (qFuzzyCompare(oldMin, min) && qFuzzyCompare(oldMax, max))
+    if (qFuzzyCompare(m_limitsMax, limitsMax))
         return;
 
-    m_limitsMin = min;
-    m_limitsMax = max;
-    if (m_constraint)
-        static_cast<JPH::SliderConstraint *>(m_constraint)->SetLimits(m_limitsMin, m_limitsMax);
-
-    if (!qFuzzyCompare(oldMin, min))
-        emit limitsMinChanged(m_limitsMin);
-    if (!qFuzzyCompare(oldMax, max))
-        emit limitsMaxChanged(m_limitsMax);
+    m_limitsMax = limitsMax;
+    emit limitsMaxChanged(m_limitsMax);
+    emit changed();
 }
 
-SpringSettings *SliderConstraint::limitsSpringSettings() const
+SpringSettings *SliderConstraintSettings::limitsSpringSettings() const
 {
     return m_limitsSpringSettings;
 }
 
-void SliderConstraint::setLimitsSpringSettings(SpringSettings *limitsSpringSettings)
+void SliderConstraintSettings::setLimitsSpringSettings(SpringSettings *limitsSpringSettings)
 {
     if (m_limitsSpringSettings == limitsSpringSettings)
         return;
 
-    if (m_limitsSpringSettingsConnection)
-        QObject::disconnect(m_limitsSpringSettingsConnection);
-    m_limitsSpringSettingsConnection = {};
+    if (m_limitsSpringSettings)
+        m_limitsSpringSettings->disconnect(this);
 
     m_limitsSpringSettings = limitsSpringSettings;
 
     if (m_limitsSpringSettings) {
-        m_limitsSpringSettingsConnection = QObject::connect(
-            m_limitsSpringSettings, &SpringSettings::changed, this, [this] {
-                if (m_constraint && m_limitsSpringSettings)
-                    static_cast<JPH::SliderConstraint *>(m_constraint)->SetLimitsSpringSettings(
-                        m_limitsSpringSettings->getJoltSpringSettings());
-            });
-        QObject::connect(m_limitsSpringSettings, &QObject::destroyed, this, [this](QObject *obj) {
+        connect(m_limitsSpringSettings, &SpringSettings::changed, this, &AbstractPhysicsConstraintSettings::changed);
+        connect(m_limitsSpringSettings, &QObject::destroyed, this, [this](QObject *obj) {
             if (m_limitsSpringSettings == obj)
                 setLimitsSpringSettings(nullptr);
         });
     }
 
-    if (m_constraint) {
-        if (m_limitsSpringSettings)
-            static_cast<JPH::SliderConstraint *>(m_constraint)->SetLimitsSpringSettings(
-                m_limitsSpringSettings->getJoltSpringSettings());
-        else
-            static_cast<JPH::SliderConstraint *>(m_constraint)->SetLimitsSpringSettings(
-                JPH::SpringSettings());
-    }
-
     emit limitsSpringSettingsChanged(m_limitsSpringSettings);
+    emit changed();
 }
 
-float SliderConstraint::maxFrictionForce() const
+float SliderConstraintSettings::maxFrictionForce() const
 {
     return m_maxFrictionForce;
 }
 
-void SliderConstraint::setMaxFrictionForce(float maxFrictionForce)
+void SliderConstraintSettings::setMaxFrictionForce(float maxFrictionForce)
 {
     if (qFuzzyCompare(m_maxFrictionForce, maxFrictionForce))
         return;
 
     m_maxFrictionForce = maxFrictionForce;
-
-    if (m_constraint)
-        static_cast<JPH::SliderConstraint *>(m_constraint)->SetMaxFrictionForce(m_maxFrictionForce);
-
     emit maxFrictionForceChanged(m_maxFrictionForce);
+    emit changed();
+}
+
+JPH::Ref<JPH::TwoBodyConstraintSettings> SliderConstraintSettings::createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame) const
+{
+    auto *settings = new JPH::SliderConstraintSettings;
+    applyBaseSettings(*settings);
+    settings->mSpace = static_cast<JPH::EConstraintSpace>(m_space);
+    settings->mPoint1 = PhysicsUtils::toJoltType(m_point1);
+    settings->mPoint2 = PhysicsUtils::toJoltType(m_point2);
+    settings->mAutoDetectPoint = m_autoDetectPoint;
+    settings->mSliderAxis1 = PhysicsUtils::toJoltType(m_sliderAxis1);
+    settings->mSliderAxis2 = PhysicsUtils::toJoltType(m_sliderAxis2);
+    settings->mNormalAxis1 = PhysicsUtils::toJoltType(m_normalAxis1);
+    settings->mNormalAxis2 = PhysicsUtils::toJoltType(m_normalAxis2);
+    settings->mLimitsMin = m_limitsMin;
+    settings->mLimitsMax = m_limitsMax;
+    if (m_limitsSpringSettings)
+        settings->mLimitsSpringSettings = m_limitsSpringSettings->getJoltSpringSettings();
+    settings->mMaxFrictionForce = m_maxFrictionForce;
+    mapToWorld(settings, localFrame);
+    return settings;
+}
+
+void SliderConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                          const QQuick3DNode *localFrame) const
+{
+    if (settings == nullptr || !canMapToWorld(localFrame))
+        return;
+
+    auto *slider = JPH::DynamicCast<JPH::SliderConstraintSettings>(settings);
+    if (slider == nullptr)
+        return;
+
+    const QQuaternion rotation = localFrame->sceneRotation();
+    mapPositionToWorld(slider->mPoint1, localFrame);
+    mapPositionToWorld(slider->mPoint2, localFrame);
+    mapDirectionToWorld(slider->mSliderAxis1, rotation);
+    mapDirectionToWorld(slider->mSliderAxis2, rotation);
+    mapDirectionToWorld(slider->mNormalAxis1, rotation);
+    mapDirectionToWorld(slider->mNormalAxis2, rotation);
+}
+
+SliderConstraint::SliderConstraint(QQuick3DNode *parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
+{
+    setSettings(new SliderConstraintSettings(this));
+}
+
+SliderConstraint::~SliderConstraint() = default;
+
+SliderConstraintSettings *SliderConstraint::settings() const
+{
+    return m_settings;
+}
+
+void SliderConstraint::setSettings(SliderConstraintSettings *settings)
+{
+    if (m_settings == settings)
+        return;
+
+    if (m_settings != nullptr)
+        m_settings->disconnect(this);
+
+    m_settings = settings;
+
+    if (m_settings != nullptr) {
+        QObject::connect(m_settings, &AbstractPhysicsConstraintSettings::changed, this,
+                         [this] { updateJoltObject(); });
+        QObject::connect(m_settings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_settings == obj)
+                setSettings(nullptr);
+        });
+    }
+
+    updateJoltObject();
+    emit settingsChanged(m_settings);
 }
 
 float SliderConstraint::getCurrentPosition() const
@@ -300,28 +272,14 @@ float SliderConstraint::getCurrentPosition() const
 
 void SliderConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || !joltBodiesReady())
+    if (m_jolt == nullptr || !joltBodiesReady() || m_settings == nullptr)
         return;
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
-    m_constraintSettings.mAutoDetectPoint = m_autoDetectPoint;
-    m_constraintSettings.mPoint1 = PhysicsUtils::toJoltType(m_point1);
-    m_constraintSettings.mPoint2 = PhysicsUtils::toJoltType(m_point2);
-    m_constraintSettings.mSliderAxis1 = PhysicsUtils::toJoltType(m_sliderAxis1);
-    m_constraintSettings.mSliderAxis2 = PhysicsUtils::toJoltType(m_sliderAxis2);
-    m_constraintSettings.mNormalAxis1 = PhysicsUtils::toJoltType(m_normalAxis1);
-    m_constraintSettings.mNormalAxis2 = PhysicsUtils::toJoltType(m_normalAxis2);
-    sanitizeSliderLimits(m_limitsMin, m_limitsMax);
-    m_constraintSettings.mLimitsMin = m_limitsMin;
-    m_constraintSettings.mLimitsMax = m_limitsMax;
-    m_constraintSettings.mMaxFrictionForce = m_maxFrictionForce;
-
-    if (m_limitsSpringSettings)
-        m_constraintSettings.mLimitsSpringSettings = m_limitsSpringSettings->getJoltSpringSettings();
-
-    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
+    const JPH::Ref<JPH::TwoBodyConstraintSettings> settings =
+            m_settings->createJoltTwoBodyConstraintSettings();
+    m_constraint = settings->Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

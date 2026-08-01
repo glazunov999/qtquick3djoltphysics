@@ -12,25 +12,28 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT FixedConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT FixedConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
+    Q_PROPERTY(bool autoDetectPoint READ autoDetectPoint WRITE setAutoDetectPoint NOTIFY autoDetectPointChanged)
     Q_PROPERTY(QVector3D point1 READ point1 WRITE setPoint1 NOTIFY point1Changed)
     Q_PROPERTY(QVector3D point2 READ point2 WRITE setPoint2 NOTIFY point2Changed)
     Q_PROPERTY(QVector3D axisX1 READ axisX1 WRITE setAxisX1 NOTIFY axisX1Changed)
     Q_PROPERTY(QVector3D axisX2 READ axisX2 WRITE setAxisX2 NOTIFY axisX2Changed)
     Q_PROPERTY(QVector3D axisY1 READ axisY1 WRITE setAxisY1 NOTIFY axisY1Changed)
     Q_PROPERTY(QVector3D axisY2 READ axisY2 WRITE setAxisY2 NOTIFY axisY2Changed)
-    QML_NAMED_ELEMENT(FixedConstraint)
+    QML_NAMED_ELEMENT(FixedConstraintSettings)
 public:
-    explicit FixedConstraint(QQuick3DNode *parent = nullptr);
-    ~FixedConstraint() override;
+    explicit FixedConstraintSettings(QObject *parent = nullptr);
+
+    bool autoDetectPoint() const;
+    void setAutoDetectPoint(bool autoDetectPoint);
 
     QVector3D point1() const;
-    void setPoint1(const QVector3D &point);
+    void setPoint1(const QVector3D &point1);
 
     QVector3D point2() const;
-    void setPoint2(const QVector3D &point);
+    void setPoint2(const QVector3D &point2);
 
     QVector3D axisX1() const;
     void setAxisX1(const QVector3D &axisX1);
@@ -44,25 +47,49 @@ public:
     QVector3D axisY2() const;
     void setAxisY2(const QVector3D &axisY2);
 
-signals:
-    void point1Changed(const QVector3D &point);
-    void point2Changed(const QVector3D &point);
-    void axisX1Changed(const QVector3D &axisX);
-    void axisX2Changed(const QVector3D &axisX);
-    void axisY1Changed(const QVector3D &axisY);
-    void axisY2Changed(const QVector3D &axisY);
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
 
-protected:
-    void updateJoltObject() override;
+signals:
+    void autoDetectPointChanged(bool autoDetectPoint);
+    void point1Changed(const QVector3D &point1);
+    void point2Changed(const QVector3D &point2);
+    void axisX1Changed(const QVector3D &axisX1);
+    void axisX2Changed(const QVector3D &axisX2);
+    void axisY1Changed(const QVector3D &axisY1);
+    void axisY2Changed(const QVector3D &axisY2);
 
 private:
+    bool m_autoDetectPoint = false;
     QVector3D m_point1;
     QVector3D m_point2;
     QVector3D m_axisX1 = QVector3D(1, 0, 0);
     QVector3D m_axisX2 = QVector3D(1, 0, 0);
     QVector3D m_axisY1 = QVector3D(0, 1, 0);
     QVector3D m_axisY2 = QVector3D(0, 1, 0);
-    JPH::FixedConstraintSettings m_constraintSettings;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT FixedConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(FixedConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    QML_NAMED_ELEMENT(FixedConstraint)
+public:
+    explicit FixedConstraint(QQuick3DNode *parent = nullptr);
+    ~FixedConstraint() override;
+
+    FixedConstraintSettings *settings() const;
+    void setSettings(FixedConstraintSettings *settings);
+
+signals:
+    void settingsChanged(FixedConstraintSettings *settings);
+
+protected:
+    void updateJoltObject() override;
+
+private:
+    FixedConstraintSettings *m_settings = nullptr;
 };
 
 #endif // FIXEDCONSTRAINT_P_H

@@ -4,6 +4,7 @@
 #include "physicslayers.h"
 #include "physicssettings_p.h"
 #include "raycastresult_p.h"
+#include "collidepointresult_p.h"
 #include "collideshaperesult_p.h"
 #include "shapecastresult_p.h"
 #include "triangleresult_p.h"
@@ -18,6 +19,8 @@
 #include <QPointer>
 #include <QElapsedTimer>
 #include <QtQml/qqml.h>
+
+#include <memory>
 
 #include <QtQuick3D/private/qquick3dviewport_p.h>
 
@@ -39,13 +42,15 @@ class AbstractPhysicsNode;
 class CharacterVirtual;
 class BodyFilter;
 class FrameAnimator;
+class DebugGeometry;
+
+class QQuick3DModel;
+class QQuick3DPrincipledMaterial;
 
 class Q_QUICK3DJOLTPHYSICS_EXPORT PhysicsSystem : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(int startTime READ startTime WRITE setStartTime NOTIFY startTimeChanged)
-    Q_PROPERTY(int time READ time WRITE setTime NOTIFY timeChanged)
     Q_PROPERTY(PhysicsSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
     Q_PROPERTY(QVector3D gravity READ gravity WRITE setGravity NOTIFY gravityChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
@@ -66,6 +71,8 @@ class Q_QUICK3DJOLTPHYSICS_EXPORT PhysicsSystem : public QObject, public QQmlPar
     Q_PROPERTY(AbstractContactListener *contactListener READ contactListener WRITE setContactListener NOTIFY contactListenerChanged)
     Q_PROPERTY(AbstractSoftBodyContactListener *softBodyContactListener READ softBodyContactListener WRITE setSoftBodyContactListener NOTIFY softBodyContactListenerChanged)
     Q_PROPERTY(QQuick3DNode *scene READ scene WRITE setScene NOTIFY sceneChanged)
+    Q_PROPERTY(QQuick3DNode *viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
+    Q_PROPERTY(bool forceDebugDraw READ forceDebugDraw WRITE setForceDebugDraw NOTIFY forceDebugDrawChanged)
 
     QML_NAMED_ELEMENT(PhysicsSystem)
 public:
@@ -83,10 +90,6 @@ public:
     static void addToCharacterVsCharacterCollision(CharacterVirtual *character);
     static void removeFromCharacterVsCharacterCollision(CharacterVirtual *character);
 
-    int startTime() const;
-    void setStartTime(int startTime);
-    int time() const;
-    void setTime(int time);
     PhysicsSettings *settings() const;
     void setSettings(PhysicsSettings *settings);
     QVector3D gravity() const;
@@ -121,6 +124,10 @@ public:
     void setSoftBodyContactListener(AbstractSoftBodyContactListener *listener);
     QQuick3DNode *scene() const;
     void setScene(QQuick3DNode *scene);
+    QQuick3DNode *viewport() const;
+    void setViewport(QQuick3DNode *viewport);
+    bool forceDebugDraw() const;
+    void setForceDebugDraw(bool forceDebugDraw);
 
     Q_INVOKABLE RayCastResult castRay(const QVector3D &origin, const QVector3D &direction, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
     Q_INVOKABLE RayCastResult castRay(const QVector3D &origin, const QVector3D &direction, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
@@ -128,9 +135,9 @@ public:
     Q_INVOKABLE QVector<RayCastResult> collectRay(const QVector3D &origin, const QVector3D &direction, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
     Q_INVOKABLE QVector<RayCastResult> collectRay(const QVector3D &origin, const QVector3D &direction, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
     Q_INVOKABLE QVector<RayCastResult> collectRay(const QVector3D &origin, const QVector3D &direction, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
-    Q_INVOKABLE QVector<Body *> collidePoint(const QVector3D &point, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
-    Q_INVOKABLE QVector<Body *> collidePoint(const QVector3D &point, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
-    Q_INVOKABLE QVector<Body *> collidePoint(const QVector3D &point, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
+    Q_INVOKABLE QVector<CollidePointResult> collidePoint(const QVector3D &point, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
+    Q_INVOKABLE QVector<CollidePointResult> collidePoint(const QVector3D &point, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
+    Q_INVOKABLE QVector<CollidePointResult> collidePoint(const QVector3D &point, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
     Q_INVOKABLE QVector<CollideShapeResult> collideShape(AbstractShape *shape, const QMatrix4x4 &transform, const QVector3D &baseOffset, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
     Q_INVOKABLE QVector<CollideShapeResult> collideShape(AbstractShape *shape, const QMatrix4x4 &transform, const QVector3D &baseOffset, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
     Q_INVOKABLE QVector<CollideShapeResult> collideShape(AbstractShape *shape, const QMatrix4x4 &transform, const QVector3D &baseOffset, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter, int maxHits = 0) const;
@@ -142,8 +149,6 @@ public:
     Q_INVOKABLE QVector<TriangleResult> getTriangles(const QVector3D &position, const QVector3D &scale, const QVector3D &baseOffset, quint32 broadPhaseLayerFilter, quint32 objectLayerFilter, const QVector<AbstractPhysicsBody *> &bodyFilter) const;
 
 signals:
-    void startTimeChanged(int startTime);
-    void timeChanged(int time);
     void settingsChanged(PhysicsSettings *settings);
     void gravityChanged(QVector3D gravity);
     void runningChanged(bool running);
@@ -161,6 +166,8 @@ signals:
     void contactListenerChanged(AbstractContactListener *contactListener);
     void softBodyContactListenerChanged(AbstractSoftBodyContactListener *listener);
     void sceneChanged(QQuick3DNode *scene);
+    void viewportChanged(QQuick3DNode *viewport);
+    void forceDebugDrawChanged(bool forceDebugDraw);
     void beforeFrameDone(float deltaTime);
     void frameDone(float deltaTime);
 
@@ -169,14 +176,17 @@ private:
     void matchOrphanPhysicsNodes();
     void findPhysicsNodes();
     void simulateFrame();
+    void frameFinishedDesignStudio();
     void emitContactCallbacks();
+    void setupDebugModel(QQuick3DNode *sceneNode);
+    void disableDebugDraw();
+    void destroyDebugModel();
+    void updateDebugDraw();
+    void refreshDesignStudioMode();
 
     friend class FrameAnimator;
 
     QList<AbstractPhysicsNode *> m_physicsNodes;
-
-    int m_startTime = 0;
-    int m_time = 0;
 
     PhysicsSettings *m_settings = nullptr;
     bool m_settingsDirty = false;
@@ -193,6 +203,12 @@ private:
     quint32 m_maxContactConstraints = 20480;
     int m_numThreads = -1;
     QQuick3DNode *m_scene = nullptr;
+    QQuick3DNode *m_viewport = nullptr;
+    bool m_forceDebugDraw = false;
+
+    DebugGeometry *m_debugGeometry = nullptr;
+    QQuick3DModel *m_debugModel = nullptr;
+    QQuick3DPrincipledMaterial *m_debugMaterial = nullptr;
 
     JPH::PhysicsSystem *m_jolt = nullptr;
     JPH::TempAllocator *m_tempAllocator = nullptr;
@@ -207,6 +223,9 @@ private:
 
     FrameAnimator *m_frameAnimator = nullptr;
     bool m_physicsInitialized = false;
+    bool m_inDesignStudio = false;
+
+    std::unique_ptr<class JoltDebugRenderer> m_debugRenderer;
 };
 
 #endif // PHYSICSSYSTEM_P_H

@@ -54,6 +54,8 @@ public:
     float maxTorqueLimit() const;
     void setMaxTorqueLimit(float maxTorqueLimit);
 
+    JPH::MotorSettings getJoltMotorSettings() const;
+
 signals:
     void springModeChanged(SpringMode springMode);
     void springFrequencyChanged(float springFrequency);
@@ -66,9 +68,6 @@ signals:
     void changed();
 
 private:
-    JPH::MotorSettings getJoltMotorSettings() const;
-    friend class PathConstraint;
-
     SpringMode m_springMode = SpringMode::FrequencyAndDamping;
     float m_springFrequency = 2.0f;
     float m_springStiffness = 0.0f;

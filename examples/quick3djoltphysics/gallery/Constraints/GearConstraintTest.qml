@@ -239,32 +239,38 @@ Item {
             id: hinge1
             body1: mount1
             body2: gear1
-            point1: gear1Position
-            point2: gear1Position
-            hingeAxis1: Qt.vector3d(0, 0, 1)
-            hingeAxis2: Qt.vector3d(0, 0, 1)
-            normalAxis1: Qt.vector3d(1, 0, 0)
-            normalAxis2: Qt.vector3d(1, 0, 0)
+            settings: HingeConstraintSettings {
+                point1: gear1Position
+                point2: gear1Position
+                hingeAxis1: Qt.vector3d(0, 0, 1)
+                hingeAxis2: Qt.vector3d(0, 0, 1)
+                normalAxis1: Qt.vector3d(1, 0, 0)
+                normalAxis2: Qt.vector3d(1, 0, 0)
+            }
         }
 
         HingeConstraint {
             id: hinge2
             body1: mount2
             body2: gear2
-            point1: gear2Position
-            point2: gear2Position
-            hingeAxis1: Qt.vector3d(0, 0, 1)
-            hingeAxis2: Qt.vector3d(0, 0, 1)
-            normalAxis1: Qt.vector3d(1, 0, 0)
-            normalAxis2: Qt.vector3d(1, 0, 0)
+            settings: HingeConstraintSettings {
+                point1: gear2Position
+                point2: gear2Position
+                hingeAxis1: Qt.vector3d(0, 0, 1)
+                hingeAxis2: Qt.vector3d(0, 0, 1)
+                normalAxis1: Qt.vector3d(1, 0, 0)
+                normalAxis2: Qt.vector3d(1, 0, 0)
+            }
         }
 
         GearConstraint {
             body1: gear1
             body2: gear2
-            hingeAxis1: Qt.vector3d(0, 0, 1)
-            hingeAxis2: Qt.vector3d(0, 0, 1)
-            ratio: gearRatio
+            settings: GearConstraintSettings {
+                hingeAxis1: Qt.vector3d(0, 0, 1)
+                hingeAxis2: Qt.vector3d(0, 0, 1)
+                ratio: gearRatio
+            }
             gear1Constraint: hinge1
             gear2Constraint: hinge2
         }

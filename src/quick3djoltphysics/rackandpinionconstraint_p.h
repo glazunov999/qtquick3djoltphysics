@@ -14,18 +14,15 @@
 
 #include <QVector3D>
 
-class Q_QUICK3DJOLTPHYSICS_EXPORT RackAndPinionConstraint : public AbstractTwoBodyPhysicsConstraint
+class Q_QUICK3DJOLTPHYSICS_EXPORT RackAndPinionConstraintSettings : public AbstractTwoBodyPhysicsConstraintSettings
 {
     Q_OBJECT
     Q_PROPERTY(QVector3D hingeAxis READ hingeAxis WRITE setHingeAxis NOTIFY hingeAxisChanged)
     Q_PROPERTY(QVector3D sliderAxis READ sliderAxis WRITE setSliderAxis NOTIFY sliderAxisChanged)
     Q_PROPERTY(float ratio READ ratio WRITE setRatio NOTIFY ratioChanged)
-    Q_PROPERTY(HingeConstraint *pinionConstraint READ pinionConstraint WRITE setPinionConstraint NOTIFY pinionConstraintChanged)
-    Q_PROPERTY(SliderConstraint *rackConstraint READ rackConstraint WRITE setRackConstraint NOTIFY rackConstraintChanged)
-    QML_NAMED_ELEMENT(RackAndPinionConstraint)
+    QML_NAMED_ELEMENT(RackAndPinionConstraintSettings)
 public:
-    explicit RackAndPinionConstraint(QQuick3DNode *parent = nullptr);
-    ~RackAndPinionConstraint() override;
+    explicit RackAndPinionConstraintSettings(QObject *parent = nullptr);
 
     QVector3D hingeAxis() const;
     void setHingeAxis(const QVector3D &hingeAxis);
@@ -35,6 +32,35 @@ public:
 
     float ratio() const;
     void setRatio(float ratio);
+
+    JPH::Ref<JPH::TwoBodyConstraintSettings> createJoltTwoBodyConstraintSettings(const QQuick3DNode *localFrame = nullptr) const override;
+    void mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                    const QQuick3DNode *localFrame) const override;
+
+signals:
+    void hingeAxisChanged(const QVector3D &hingeAxis);
+    void sliderAxisChanged(const QVector3D &sliderAxis);
+    void ratioChanged(float ratio);
+
+private:
+    QVector3D m_hingeAxis = QVector3D(0, 0, 1);
+    QVector3D m_sliderAxis = QVector3D(1, 0, 0);
+    float m_ratio = 1.0f;
+};
+
+class Q_QUICK3DJOLTPHYSICS_EXPORT RackAndPinionConstraint : public AbstractTwoBodyPhysicsConstraint
+{
+    Q_OBJECT
+    Q_PROPERTY(RackAndPinionConstraintSettings *settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    Q_PROPERTY(HingeConstraint *pinionConstraint READ pinionConstraint WRITE setPinionConstraint NOTIFY pinionConstraintChanged)
+    Q_PROPERTY(SliderConstraint *rackConstraint READ rackConstraint WRITE setRackConstraint NOTIFY rackConstraintChanged)
+    QML_NAMED_ELEMENT(RackAndPinionConstraint)
+public:
+    explicit RackAndPinionConstraint(QQuick3DNode *parent = nullptr);
+    ~RackAndPinionConstraint() override;
+
+    RackAndPinionConstraintSettings *settings() const;
+    void setSettings(RackAndPinionConstraintSettings *settings);
 
     HingeConstraint *pinionConstraint() const;
     void setPinionConstraint(HingeConstraint *constraint);
@@ -47,9 +73,7 @@ public:
     Q_INVOKABLE static float ratioFromTeeth(int rackNumTeeth, float rackLength, int pinionNumTeeth);
 
 signals:
-    void hingeAxisChanged(const QVector3D &hingeAxis);
-    void sliderAxisChanged(const QVector3D &sliderAxis);
-    void ratioChanged(float ratio);
+    void settingsChanged(RackAndPinionConstraintSettings *settings);
     void pinionConstraintChanged(HingeConstraint *constraint);
     void rackConstraintChanged(SliderConstraint *constraint);
 
@@ -63,16 +87,13 @@ private:
     void watchRackSlider(SliderConstraint *slider, QMetaObject::Connection &body1Connection,
                          QMetaObject::Connection &body2Connection);
 
-    QVector3D m_hingeAxis = QVector3D(0, 0, 1);
-    QVector3D m_sliderAxis = QVector3D(1, 0, 0);
-    float m_ratio = 1.0f;
+    RackAndPinionConstraintSettings *m_settings = nullptr;
     HingeConstraint *m_pinionConstraint = nullptr;
     SliderConstraint *m_rackConstraint = nullptr;
     QMetaObject::Connection m_pinionBody1SignalConnection;
     QMetaObject::Connection m_pinionBody2SignalConnection;
     QMetaObject::Connection m_rackBody1SignalConnection;
     QMetaObject::Connection m_rackBody2SignalConnection;
-    JPH::RackAndPinionConstraintSettings m_constraintSettings;
 };
 
 #endif // RACKANDPINIONCONSTRAINT_P_H

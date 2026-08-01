@@ -149,7 +149,6 @@ Item {
                 allowSleeping: false
                 eulerRotation.z: 90
                 Model {
-                    eulerRotation.z: -90
                     geometry: CapsuleGeometry {
                         height: capsuleHeight
                         diameter: capsuleDiameter
@@ -191,15 +190,15 @@ Item {
 
                 if (prev !== null) {
                     let joint = position.plus(Qt.vector3d(-halfCylinderHeight, 0, 0))
-                    constraintComponent.createObject(viewport.scene, {
-                        point1: joint,
-                        point2: joint,
+                    let constraint = constraintComponent.createObject(viewport.scene, {
                         body1: prev,
-                        body2: body,
-                        twistAxis1: Qt.vector3d(1, 0, 0),
-                        twistAxis2: Qt.vector3d(1, 0, 0),
-                        halfConeAngle: halfConeAngle
+                        body2: body
                     })
+                    constraint.settings.point1 = joint
+                    constraint.settings.point2 = joint
+                    constraint.settings.twistAxis1 = Qt.vector3d(1, 0, 0)
+                    constraint.settings.twistAxis2 = Qt.vector3d(1, 0, 0)
+                    constraint.settings.halfConeAngle = halfConeAngle
                 }
 
                 prev = body

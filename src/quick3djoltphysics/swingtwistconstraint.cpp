@@ -5,257 +5,336 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-SwingTwistConstraint::SwingTwistConstraint(QQuick3DNode *parent) : AbstractTwoBodyPhysicsConstraint(parent)
+SwingTwistConstraintSettings::SwingTwistConstraintSettings(QObject *parent)
+    : AbstractTwoBodyPhysicsConstraintSettings(parent)
 {
 }
 
-SwingTwistConstraint::~SwingTwistConstraint() = default;
-
-QVector3D SwingTwistConstraint::position1() const
+QVector3D SwingTwistConstraintSettings::position1() const
 {
     return m_position1;
 }
 
-void SwingTwistConstraint::setPosition1(const QVector3D &position1)
+void SwingTwistConstraintSettings::setPosition1(const QVector3D &position1)
 {
     if (m_position1 == position1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'position1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_position1 = position1;
     emit position1Changed(m_position1);
+    emit changed();
 }
 
-QVector3D SwingTwistConstraint::position2() const
+QVector3D SwingTwistConstraintSettings::position2() const
 {
     return m_position2;
 }
 
-void SwingTwistConstraint::setPosition2(const QVector3D &position2)
+void SwingTwistConstraintSettings::setPosition2(const QVector3D &position2)
 {
     if (m_position2 == position2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'position2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_position2 = position2;
     emit position2Changed(m_position2);
+    emit changed();
 }
 
-QVector3D SwingTwistConstraint::twistAxis1() const
+QVector3D SwingTwistConstraintSettings::twistAxis1() const
 {
     return m_twistAxis1;
 }
 
-void SwingTwistConstraint::setTwistAxis1(const QVector3D &twistAxis1)
+void SwingTwistConstraintSettings::setTwistAxis1(const QVector3D &twistAxis1)
 {
     if (m_twistAxis1 == twistAxis1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'twistAxis1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_twistAxis1 = twistAxis1;
     emit twistAxis1Changed(m_twistAxis1);
+    emit changed();
 }
 
-QVector3D SwingTwistConstraint::twistAxis2() const
+QVector3D SwingTwistConstraintSettings::twistAxis2() const
 {
     return m_twistAxis2;
 }
 
-void SwingTwistConstraint::setTwistAxis2(const QVector3D &twistAxis2)
+void SwingTwistConstraintSettings::setTwistAxis2(const QVector3D &twistAxis2)
 {
     if (m_twistAxis2 == twistAxis2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'twistAxis2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_twistAxis2 = twistAxis2;
-    emit twistAxis1Changed(m_twistAxis2);
+    emit twistAxis2Changed(m_twistAxis2);
+    emit changed();
 }
 
-QVector3D SwingTwistConstraint::planeAxis1() const
+QVector3D SwingTwistConstraintSettings::planeAxis1() const
 {
     return m_planeAxis1;
 }
 
-void SwingTwistConstraint::setPlaneAxis1(const QVector3D &planeAxis1)
+void SwingTwistConstraintSettings::setPlaneAxis1(const QVector3D &planeAxis1)
 {
     if (m_planeAxis1 == planeAxis1)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'planeAxis1' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_planeAxis1 = planeAxis1;
     emit planeAxis1Changed(m_planeAxis1);
+    emit changed();
 }
 
-QVector3D SwingTwistConstraint::planeAxis2() const
+QVector3D SwingTwistConstraintSettings::planeAxis2() const
 {
     return m_planeAxis2;
 }
 
-void SwingTwistConstraint::setPlaneAxis2(const QVector3D &planeAxis2)
+void SwingTwistConstraintSettings::setPlaneAxis2(const QVector3D &planeAxis2)
 {
     if (m_planeAxis2 == planeAxis2)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'planeAxis2' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
     m_planeAxis2 = planeAxis2;
-    emit planeAxis2Changed(m_planeAxis1);
+    emit planeAxis2Changed(m_planeAxis2);
+    emit changed();
 }
 
-SwingTwistConstraint::SwingType SwingTwistConstraint::swingType() const
+SwingTwistConstraintSettings::SwingType SwingTwistConstraintSettings::swingType() const
 {
-    return static_cast<SwingType>(m_constraintSettings.mSwingType);
+    return m_swingType;
 }
 
-void SwingTwistConstraint::setSwingType(SwingType swingType)
+void SwingTwistConstraintSettings::setSwingType(SwingType swingType)
 {
-    if (static_cast<SwingType>(m_constraintSettings.mSwingType) == swingType)
+    if (m_swingType == swingType)
         return;
 
-    if (m_constraint) {
-        qWarning() << "Warning: Changing 'swingType' after constraint is initialized will have "
-                      "no effect";
-        return;
-    }
-
-    m_constraintSettings.mSwingType = static_cast<JPH::ESwingType>(swingType);
-    emit swingTypeChanged(swingType);
+    m_swingType = swingType;
+    emit swingTypeChanged(m_swingType);
+    emit changed();
 }
 
-float SwingTwistConstraint::normalHalfConeAngle() const
+float SwingTwistConstraintSettings::normalHalfConeAngle() const
 {
     return m_normalHalfConeAngle;
 }
 
-void SwingTwistConstraint::setNormalHalfConeAngle(float normalHalfConeAngle)
+void SwingTwistConstraintSettings::setNormalHalfConeAngle(float normalHalfConeAngle)
 {
     if (qFuzzyCompare(m_normalHalfConeAngle, normalHalfConeAngle))
         return;
 
-    if (m_constraint)
-        static_cast<JPH::SwingTwistConstraint *>(m_constraint)->SetNormalHalfConeAngle(qDegreesToRadians(normalHalfConeAngle));
-
     m_normalHalfConeAngle = normalHalfConeAngle;
-    emit normalHalfConeAngleChanged(normalHalfConeAngle);
+    emit normalHalfConeAngleChanged(m_normalHalfConeAngle);
+    emit changed();
 }
 
-float SwingTwistConstraint::planeHalfConeAngle() const
+float SwingTwistConstraintSettings::planeHalfConeAngle() const
 {
     return m_planeHalfConeAngle;
 }
 
-void SwingTwistConstraint::setPlaneHalfConeAngle(float planeHalfConeAngle)
+void SwingTwistConstraintSettings::setPlaneHalfConeAngle(float planeHalfConeAngle)
 {
     if (qFuzzyCompare(m_planeHalfConeAngle, planeHalfConeAngle))
         return;
 
-    if (m_constraint)
-        static_cast<JPH::SwingTwistConstraint *>(m_constraint)->SetPlaneHalfConeAngle(qDegreesToRadians(m_planeHalfConeAngle));
-
     m_planeHalfConeAngle = planeHalfConeAngle;
-    emit planeHalfConeAngleChanged(planeHalfConeAngle);
+    emit planeHalfConeAngleChanged(m_planeHalfConeAngle);
+    emit changed();
 }
 
-float SwingTwistConstraint::twistMinAngle() const
+float SwingTwistConstraintSettings::twistMinAngle() const
 {
     return m_twistMinAngle;
 }
 
-void SwingTwistConstraint::setTwistMinAngle(float twistMinAngle)
+void SwingTwistConstraintSettings::setTwistMinAngle(float twistMinAngle)
 {
     if (qFuzzyCompare(m_twistMinAngle, twistMinAngle))
         return;
 
-    if (m_constraint)
-        static_cast<JPH::SwingTwistConstraint *>(m_constraint)->SetTwistMinAngle(qDegreesToRadians(m_twistMinAngle));
-
     m_twistMinAngle = twistMinAngle;
-    emit twistMinAngleChanged(twistMinAngle);
+    emit twistMinAngleChanged(m_twistMinAngle);
+    emit changed();
 }
 
-float SwingTwistConstraint::twistMaxAngle() const
+float SwingTwistConstraintSettings::twistMaxAngle() const
 {
     return m_twistMaxAngle;
 }
 
-void SwingTwistConstraint::setTwistMaxAngle(float twistMaxAngle)
+void SwingTwistConstraintSettings::setTwistMaxAngle(float twistMaxAngle)
 {
     if (qFuzzyCompare(m_twistMaxAngle, twistMaxAngle))
         return;
 
-    if (m_constraint)
-        static_cast<JPH::SwingTwistConstraint *>(m_constraint)->SetTwistMaxAngle(qDegreesToRadians(m_twistMaxAngle));
-
     m_twistMaxAngle = twistMaxAngle;
-    emit twistMaxAngleChanged(twistMaxAngle);
+    emit twistMaxAngleChanged(m_twistMaxAngle);
+    emit changed();
 }
 
-float SwingTwistConstraint::maxFrictionTorque() const
+float SwingTwistConstraintSettings::maxFrictionTorque() const
 {
-    return m_constraintSettings.mMaxFrictionTorque;
+    return m_maxFrictionTorque;
 }
 
-void SwingTwistConstraint::setMaxFrictionTorque(float maxFrictionTorque)
+void SwingTwistConstraintSettings::setMaxFrictionTorque(float maxFrictionTorque)
 {
-    if (qFuzzyCompare(m_constraintSettings.mMaxFrictionTorque, maxFrictionTorque))
+    if (qFuzzyCompare(m_maxFrictionTorque, maxFrictionTorque))
         return;
 
-    if (m_constraint)
-        static_cast<JPH::SwingTwistConstraint *>(m_constraint)->SetMaxFrictionTorque(maxFrictionTorque);
+    m_maxFrictionTorque = maxFrictionTorque;
+    emit maxFrictionTorqueChanged(m_maxFrictionTorque);
+    emit changed();
+}
 
-    m_constraintSettings.mMaxFrictionTorque = maxFrictionTorque;
-    emit maxFrictionTorqueChanged(maxFrictionTorque);
+MotorSettings *SwingTwistConstraintSettings::swingMotorSettings() const
+{
+    return m_swingMotorSettings;
+}
+
+void SwingTwistConstraintSettings::setSwingMotorSettings(MotorSettings *swingMotorSettings)
+{
+    if (m_swingMotorSettings == swingMotorSettings)
+        return;
+
+    if (m_swingMotorSettings)
+        m_swingMotorSettings->disconnect(this);
+
+    m_swingMotorSettings = swingMotorSettings;
+
+    if (m_swingMotorSettings) {
+        connect(m_swingMotorSettings, &MotorSettings::changed, this, &AbstractPhysicsConstraintSettings::changed);
+        connect(m_swingMotorSettings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_swingMotorSettings == obj)
+                setSwingMotorSettings(nullptr);
+        });
+    }
+
+    emit swingMotorSettingsChanged(m_swingMotorSettings);
+    emit changed();
+}
+
+MotorSettings *SwingTwistConstraintSettings::twistMotorSettings() const
+{
+    return m_twistMotorSettings;
+}
+
+void SwingTwistConstraintSettings::setTwistMotorSettings(MotorSettings *twistMotorSettings)
+{
+    if (m_twistMotorSettings == twistMotorSettings)
+        return;
+
+    if (m_twistMotorSettings)
+        m_twistMotorSettings->disconnect(this);
+
+    m_twistMotorSettings = twistMotorSettings;
+
+    if (m_twistMotorSettings) {
+        connect(m_twistMotorSettings, &MotorSettings::changed, this, &AbstractPhysicsConstraintSettings::changed);
+        connect(m_twistMotorSettings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_twistMotorSettings == obj)
+                setTwistMotorSettings(nullptr);
+        });
+    }
+
+    emit twistMotorSettingsChanged(m_twistMotorSettings);
+    emit changed();
+}
+
+JPH::Ref<JPH::TwoBodyConstraintSettings> SwingTwistConstraintSettings::createJoltTwoBodyConstraintSettings(
+        const QQuick3DNode *localFrame) const
+{
+    auto *settings = new JPH::SwingTwistConstraintSettings;
+    applyBaseSettings(*settings);
+    settings->mSpace = static_cast<JPH::EConstraintSpace>(m_space);
+    settings->mPosition1 = PhysicsUtils::toJoltType(m_position1);
+    settings->mPosition2 = PhysicsUtils::toJoltType(m_position2);
+    settings->mTwistAxis1 = PhysicsUtils::toJoltType(m_twistAxis1);
+    settings->mTwistAxis2 = PhysicsUtils::toJoltType(m_twistAxis2);
+    settings->mPlaneAxis1 = PhysicsUtils::toJoltType(m_planeAxis1);
+    settings->mPlaneAxis2 = PhysicsUtils::toJoltType(m_planeAxis2);
+    settings->mSwingType = static_cast<JPH::ESwingType>(m_swingType);
+    settings->mNormalHalfConeAngle = qDegreesToRadians(m_normalHalfConeAngle);
+    settings->mPlaneHalfConeAngle = qDegreesToRadians(m_planeHalfConeAngle);
+    settings->mTwistMinAngle = qDegreesToRadians(m_twistMinAngle);
+    settings->mTwistMaxAngle = qDegreesToRadians(m_twistMaxAngle);
+    settings->mMaxFrictionTorque = m_maxFrictionTorque;
+    if (m_swingMotorSettings)
+        settings->mSwingMotorSettings = m_swingMotorSettings->getJoltMotorSettings();
+    if (m_twistMotorSettings)
+        settings->mTwistMotorSettings = m_twistMotorSettings->getJoltMotorSettings();
+    mapToWorld(settings, localFrame);
+    return settings;
+}
+
+void SwingTwistConstraintSettings::mapToWorld(JPH::TwoBodyConstraintSettings *settings,
+                                              const QQuick3DNode *localFrame) const
+{
+    if (settings == nullptr || !canMapToWorld(localFrame))
+        return;
+
+    auto *swingTwist = JPH::DynamicCast<JPH::SwingTwistConstraintSettings>(settings);
+    if (swingTwist == nullptr)
+        return;
+
+    const QQuaternion rotation = localFrame->sceneRotation();
+    mapPositionToWorld(swingTwist->mPosition1, localFrame);
+    mapPositionToWorld(swingTwist->mPosition2, localFrame);
+    mapDirectionToWorld(swingTwist->mTwistAxis1, rotation);
+    mapDirectionToWorld(swingTwist->mTwistAxis2, rotation);
+    mapDirectionToWorld(swingTwist->mPlaneAxis1, rotation);
+    mapDirectionToWorld(swingTwist->mPlaneAxis2, rotation);
+}
+
+SwingTwistConstraint::SwingTwistConstraint(QQuick3DNode *parent)
+    : AbstractTwoBodyPhysicsConstraint(parent)
+{
+    setSettings(new SwingTwistConstraintSettings(this));
+}
+
+SwingTwistConstraint::~SwingTwistConstraint() = default;
+
+SwingTwistConstraintSettings *SwingTwistConstraint::settings() const
+{
+    return m_settings;
+}
+
+void SwingTwistConstraint::setSettings(SwingTwistConstraintSettings *settings)
+{
+    if (m_settings == settings)
+        return;
+
+    if (m_settings != nullptr)
+        m_settings->disconnect(this);
+
+    m_settings = settings;
+
+    if (m_settings != nullptr) {
+        QObject::connect(m_settings, &AbstractPhysicsConstraintSettings::changed, this,
+                         [this] { updateJoltObject(); });
+        QObject::connect(m_settings, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_settings == obj)
+                setSettings(nullptr);
+        });
+    }
+
+    updateJoltObject();
+    emit settingsChanged(m_settings);
 }
 
 void SwingTwistConstraint::updateJoltObject()
 {
-    if (m_jolt == nullptr || !joltBodiesReady())
+    if (m_jolt == nullptr || !joltBodiesReady() || m_settings == nullptr)
         return;
 
     if (m_constraint)
         m_jolt->RemoveConstraint(m_constraint);
 
-    m_constraintSettings.mSpace = static_cast<JPH::EConstraintSpace>(m_space);
-    m_constraintSettings.mPosition1 = PhysicsUtils::toJoltType(m_position1);
-    m_constraintSettings.mPosition2 = PhysicsUtils::toJoltType(m_position2);
-    m_constraintSettings.mTwistAxis1 = PhysicsUtils::toJoltType(m_twistAxis1);
-    m_constraintSettings.mTwistAxis2 = PhysicsUtils::toJoltType(m_twistAxis2);
-    m_constraintSettings.mPlaneAxis1 = PhysicsUtils::toJoltType(m_planeAxis1);
-    m_constraintSettings.mPlaneAxis2 = PhysicsUtils::toJoltType(m_planeAxis2);
-    m_constraintSettings.mNormalHalfConeAngle = qDegreesToRadians(m_normalHalfConeAngle);
-    m_constraintSettings.mPlaneHalfConeAngle = qDegreesToRadians(m_planeHalfConeAngle);
-    m_constraintSettings.mTwistMinAngle = qDegreesToRadians(m_twistMinAngle);
-    m_constraintSettings.mTwistMaxAngle = qDegreesToRadians(m_twistMaxAngle);
-
-    m_constraint = m_constraintSettings.Create(*joltBody1(), *joltBody2());
+    const JPH::Ref<JPH::TwoBodyConstraintSettings> settings =
+            m_settings->createJoltTwoBodyConstraintSettings();
+    m_constraint = settings->Create(*joltBody1(), *joltBody2());
     m_jolt->AddConstraint(m_constraint);
 }

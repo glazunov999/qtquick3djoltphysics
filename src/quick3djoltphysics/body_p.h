@@ -14,6 +14,7 @@
 namespace JPH {
 class PhysicsSystem;
 class Body;
+class BodyInterface;
 }
 
 class Q_QUICK3DJOLTPHYSICS_EXPORT Body : public AbstractPhysicsBody
@@ -174,6 +175,8 @@ public:
 
     Q_INVOKABLE void setPositionAndRotation(const QVector3D &position, const QVector3D &eulerRotation, Activation activation = Activation::Activate);
 
+    Q_INVOKABLE void notifyShapeChanged(const QVector3D &previousCenterOfMass, bool updateMassProperties = true);
+
 signals:
     void isSensorChanged(bool isSensor);
     void collisionGroupChanged(CollisionGroup *collisionGroup);
@@ -212,8 +215,13 @@ protected:
     void sync() override;
 
 private:
+    void updateCollisionGroup();
+
+    void attachJoltBody(JPH::PhysicsSystem *jolt, JPH::BodyInterface *bodyInterface, JPH::Body *body);
+    void detachJoltBody();
+    void refreshMotionTypeFromJolt();
+
     CollisionGroup *m_collisionGroup = nullptr;
-    bool m_collisionGroupDirty = false;
     MotionType m_motionType = MotionType::Static;
     MotionQuality m_motionQuality = MotionQuality::Discrete;
 
@@ -233,7 +241,9 @@ private:
     JPH::BodyCreationSettings m_bodySettings;
 
     bool m_simulationEnabled = true;
+    bool m_joltBodyAttached = false;
 
+    friend class Ragdoll;
     friend class AbstractTwoBodyPhysicsConstraint;
     friend class PointConstraint;
     friend class DistanceConstraint;

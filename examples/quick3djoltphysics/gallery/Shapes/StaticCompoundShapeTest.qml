@@ -142,6 +142,7 @@ Item {
                         height: 10
                         diameter: 2
                     }
+                    eulerRotation.z: 90
                     materials: PrincipledMaterial {
                         baseColorMap: Texture {
                             source: "qrc:/images/checkers2.png"
